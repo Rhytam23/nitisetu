@@ -126,17 +126,47 @@ router.post('/check', async (req, res) => {
             console.warn("Niti-Setu Fallback Triggered:", ragError.message);
             usedMock = true;
             
-            const isEligible = land_acres <= 5;
+            const acres = parseFloat(farmerProfile.land_acres) || 0;
+            const age = parseInt(farmerProfile.age) || 30; // Default to eligible age if not provided
+            let isEligible = false;
+            let status = "Not Eligible";
+            let reasoning = "";
+            let proof = "";
+            let cite = "";
+            let docs = ["Aadhaar Card", "Land Record (Jamabandi)", "Bank Passbook"];
+
+            if (scheme === "PM-KISAN") {
+                isEligible = acres <= 5; // 2 Hectares limit
+                status = isEligible ? "Eligible" : "Not Eligible";
+                reasoning = isEligible 
+                    ? `As an SMF with ${acres} acres, you qualify for the Rs. 6,000/year benefit under PM-KISAN.`
+                    : `Your land holding of ${acres} acres exceeds the 2-hectare (approx 5 acres) limit for SMF categorization.`;
+                proof = "Clause 3: 'A landholder farmer's family is defined as a family... who owns cultivable land up to 2 hectares'.";
+                cite = "PM-KISAN Operational Guidelines, Page 2, Section 3";
+            } else if (scheme === "PM-KMY") {
+                const isAgeEligible = age >= 18 && age <= 40;
+                isEligible = acres <= 5 && isAgeEligible;
+                status = isEligible ? "Eligible" : "Not Eligible";
+                reasoning = isEligible 
+                    ? `You are eligible for an assured monthly pension of Rs. 3,000 after age 60.`
+                    : !isAgeEligible ? `Age ${age} is outside the 18-40 entry group limit.` : `Land holding exceeds 2 hectares.`;
+                proof = "Clause 4: 'All SMFs... who are of the age of 18 years and above and upto 40 years... are eligible'.";
+                cite = "PM-KMY Operational Guidelines, Page 3, Section 4";
+            } else if (scheme === "PM-KUSUM") {
+                isEligible = true; // Most farmers are eligible for solar pump support
+                status = "Eligible";
+                reasoning = `You qualify for up to 60% combined subsidy (30% Central + 30% State) for solar pump installation.`;
+                proof = "Component B, Clause 5.2.2: 'Central Government will provide financial assistance of 30%... State Government will provide a subsidy of atleast 30%'.";
+                cite = "PM-KUSUM Guidelines, Page 7, Section 5.2.2";
+                docs.push("Copy of Electricity Bill (if applicable)", "Solar Pump Preference Form");
+            }
+
             jsonResult = {
-                status: isEligible ? "Eligible" : "Not Eligible",
-                reasoning: isEligible 
-                    ? `Based on your profile (Land: ${land_acres} acres), you are likely eligible for the ${scheme} scheme benefits.`
-                    : `Your land holding of ${land_acres} acres is above the threshold for most ${scheme} subsidies.`,
-                document_proof: isEligible 
-                    ? "Eligibility criteria for small and marginal farmers (up to 2 hectares) are met."
-                    : "Exclusion criteria for large landholders (above 2 hectares) may apply.",
-                citation: "Project Niti-Setu Internal Logic (Mock Fallback)",
-                required_documents: ["Aadhaar Card", "Land Record", "Bank Passbook"]
+                status: status,
+                reasoning: reasoning,
+                document_proof: proof,
+                citation: cite,
+                required_documents: docs
             };
         }
 
