@@ -64,23 +64,40 @@ const ProfileForm = ({ onProfileSubmit }) => {
     const newProfile = { ...profile };
     const lowerText = text.toLowerCase();
     
-    // Very rudimentary extraction for MVP demo purposes
-    if (lowerText.includes('acres') || lowerText.includes('hectares')) {
-      const match = text.match(/([\d.]+)\s*(acres?|hectares?)/i);
-      if (match) {
-        newProfile.land_acres = match[2].toLowerCase().includes('hectare') ? (parseFloat(match[1]) * 2.471).toFixed(2) : match[1];
+    // Improved land holding extraction (supports acres, hectares, decimals)
+    const landMatch = text.match(/([\d.]+)\s*(acres?|hectares?|ha|aycre)/i);
+    if (landMatch) {
+      let value = parseFloat(landMatch[1]);
+      const unit = landMatch[2].toLowerCase();
+      if (unit.startsWith('h')) {
+        // Convert hectare to acre (approx 2.47)
+        value = (value * 2.471).toFixed(2);
+      }
+      newProfile.land_acres = value.toString();
+    }
+
+    // Improved crop extraction
+    const crops = ['wheat', 'rice', 'cotton', 'millet', 'sugarcane', 'maize', 'paddy', 'mustard'];
+    for (const crop of crops) {
+      if (lowerText.includes(crop)) {
+        newProfile.crop = crop.charAt(0).toUpperCase() + crop.slice(1);
+        break;
       }
     }
-    if (lowerText.includes('wheat') || lowerText.includes('rice') || lowerText.includes('cotton') || lowerText.includes('millet')) {
-      const crops = ['wheat', 'rice', 'cotton', 'millet'];
-      for (const crop of crops) {
-         if (lowerText.includes(crop)) newProfile.crop = crop.charAt(0).toUpperCase() + crop.slice(1);
+
+    // Improved social category extraction
+    if (lowerText.includes('general') || lowerText.includes('unreserved')) newProfile.social_category = 'General';
+    else if (lowerText.includes('sc') || lowerText.includes('scheduled caste')) newProfile.social_category = 'SC';
+    else if (lowerText.includes('st') || lowerText.includes('scheduled tribe')) newProfile.social_category = 'ST';
+    else if (lowerText.includes('obc') || lowerText.includes('other backward class')) newProfile.social_category = 'OBC';
+
+    // State extraction (rudimentary list)
+    const states = ['Uttar Pradesh', 'Maharashtra', 'Madhya Pradesh', 'Bihar', 'Rajasthan', 'Karnataka', 'Tamil Nadu', 'Gujarat', 'Punjab', 'Haryana'];
+    for (const state of states) {
+      if (lowerText.includes(state.toLowerCase())) {
+        newProfile.state = state;
+        break;
       }
-    }
-    if (lowerText.includes('sc') || lowerText.includes('st') || lowerText.includes('obc')) {
-      if(lowerText.includes('sc')) newProfile.social_category = 'SC';
-      if(lowerText.includes('st')) newProfile.social_category = 'ST';
-      if(lowerText.includes('obc')) newProfile.social_category = 'OBC';
     }
     
     setProfile(newProfile);

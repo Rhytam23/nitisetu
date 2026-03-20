@@ -4,6 +4,10 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import eligibilityRoutes from './routes/eligibility.js';
 
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
 dotenv.config();
 
 const app = express();
@@ -23,21 +27,22 @@ app.use('/api', eligibilityRoutes);
 
 // Start Server
 const startServer = async () => {
-  try {
-    if (!process.env.MONGODB_URI) {
-      console.warn('WARNING: MONGODB_URI not set in .env. Skipping database connection.');
-    } else {
+  // Try to connect to MongoDB if URI is provided
+  if (!process.env.MONGODB_URI) {
+    console.warn('WARNING: MONGODB_URI not set in .env. Skipping database connection.');
+  } else {
+    try {
       await mongoose.connect(process.env.MONGODB_URI);
       console.log('Connected to MongoDB');
+    } catch (error) {
+      console.error('WARNING: Failed to connect to MongoDB initially. Server will still start, but database-dependent features may fail:', error.message);
     }
-    
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
-  } catch (error) {
-    console.error('Failed to start server:', error);
-    process.exit(1);
   }
+
+  // Always start the server regardless of DB status
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
 };
 
 startServer();

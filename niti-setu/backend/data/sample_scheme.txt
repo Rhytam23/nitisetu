@@ -1,0 +1,1 @@
+This is a sample scheme for testing. Farmers with less than 2 acres of land are eligible for 6000 rupees per year.

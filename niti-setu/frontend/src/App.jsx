@@ -1,10 +1,12 @@
 import { useState } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ArrowLeft } from 'lucide-react';
+import LandingPage from './components/LandingPage';
 import ProfileForm from './components/ProfileForm';
 import ProofCard from './components/ProofCard';
 import './index.css';
 
 function App() {
+  const [showTool, setShowTool] = useState(false);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
@@ -29,6 +31,10 @@ function App() {
       
       if (data.success) {
         setResult(data.data);
+        // Scroll to results
+        setTimeout(() => {
+          document.getElementById('result-section')?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
       } else {
         throw new Error(data.error || 'Failed to check eligibility');
       }
@@ -40,31 +46,44 @@ function App() {
     }
   };
 
+  if (!showTool) {
+    return <LandingPage onGetStarted={() => setShowTool(true)} />;
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
       {/* Header */}
-      <header className="bg-brand-600 text-white shadow-md">
-        <div className="max-w-4xl mx-auto px-6 py-5 flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-extrabold tracking-tight">Niti-Setu</h1>
-            <p className="text-brand-100 mt-1 font-medium">Voice-Based Scheme Eligibility Engine</p>
+      <header className="bg-brand-600 text-white shadow-lg sticky top-0 z-50">
+        <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => setShowTool(false)}
+              className="p-2 hover:bg-brand-700 rounded-full transition-colors"
+            >
+              <ArrowLeft className="w-6 h-6" />
+            </button>
+            <div>
+              <h1 className="text-2xl font-black tracking-tighter">Niti-Setu</h1>
+              <p className="text-brand-100 text-xs font-bold uppercase tracking-widest hidden sm:block">Eligibility Engine</p>
+            </div>
           </div>
-          <div className="hidden sm:block bg-brand-700 px-4 py-2 rounded-lg border border-brand-500 text-sm font-bold shadow-inner flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
-            AI Consultant Online
+          <div className="hidden sm:flex bg-brand-700/50 backdrop-blur-sm px-4 py-2 rounded-full border border-brand-500/50 text-[10px] font-black tracking-widest uppercase items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.8)]"></span>
+            AI Consultant Active
           </div>
         </div>
       </header>
 
       {/* Main Content Dashboard */}
-      <main className="flex-grow max-w-4xl mx-auto w-full px-6 py-10 space-y-10">
+      <main className="flex-grow max-w-4xl mx-auto w-full px-6 py-12 space-y-12">
         
-        <section>
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-800">Check Your Eligibility Instantly</h2>
-            <p className="text-gray-600 mt-2 max-w-xl mx-auto">
-              Our AI reads through 50-page bureaucratic PDFs in seconds. 
-              Tell us about yourself using your voice or fill out the form below.
+        <section className="animate-fade-in-up">
+          <div className="text-center mb-10">
+            <span className="px-3 py-1 bg-brand-100 text-brand-700 rounded-full text-[10px] font-black uppercase tracking-widest mb-4 inline-block">Step 1: Application</span>
+            <h2 className="text-4xl font-black text-gray-900 tracking-tight">Check Eligibility</h2>
+            <p className="text-gray-500 mt-3 max-w-xl mx-auto font-medium">
+              Update your profile details below. Our AI reasoning engine will parse
+              the latest government PDF guidelines in real-time.
             </p>
           </div>
           
@@ -73,32 +92,39 @@ function App() {
 
         {/* Loading State */}
         {loading && (
-          <div className="flex flex-col items-center justify-center p-12 bg-white rounded-xl shadow border border-brand-100">
-            <Loader2 className="w-12 h-12 text-brand-600 animate-spin mb-4" />
-            <h3 className="text-xl font-bold text-gray-800">Consulting Scheme Guidelines...</h3>
-            <p className="text-gray-500 mt-2">Searching vector database & reasoning with LLM</p>
+          <div className="flex flex-col items-center justify-center p-16 bg-white rounded-3xl shadow-2xl border border-brand-100 animate-pulse">
+            <Loader2 className="w-16 h-16 text-brand-600 animate-spin mb-6" />
+            <h3 className="text-2xl font-black text-gray-900 tracking-tight">Consulting AI Guidelines...</h3>
+            <p className="text-gray-500 mt-2 font-medium tracking-wide">Retrieving vector embeddings & verifying policy logic</p>
           </div>
         )}
 
         {/* Error State */}
         {error && (
-          <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-md">
-            <p className="text-red-700 font-medium">{error}</p>
+          <div className="bg-red-50 border-2 border-red-100 p-6 rounded-2xl shadow-sm animate-shake">
+            <div className="flex items-center gap-3 text-red-700 font-black mb-2 uppercase text-xs tracking-widest">
+               <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+               System Error
+            </div>
+            <p className="text-red-600 font-medium leading-relaxed">{error}</p>
           </div>
         )}
 
         {/* Result Card */}
         {(!loading && result) && (
-           <section className="scroll-mt-6" id="result-section">
+           <section className="scroll-mt-24 animate-scale-in" id="result-section">
+             <div className="text-center mb-8">
+                <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-[10px] font-black uppercase tracking-widest mb-4 inline-block">Step 2: AI Verdict</span>
+             </div>
              <ProofCard result={result} schemeName={currentScheme} />
            </section>
         )}
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-100 py-6 border-t border-gray-200 mt-auto">
-        <div className="max-w-4xl mx-auto px-6 text-center text-gray-500 text-sm">
-          <p>Niti-Setu Consultant Demo • Powered by LangChain, Google Gemini API, and MongoDB Atlas Vector Search</p>
+      <footer className="bg-white py-10 border-t border-gray-100 mt-20">
+        <div className="max-w-4xl mx-auto px-6 text-center text-gray-400 text-xs font-bold uppercase tracking-[0.2em]">
+          <p>© 2026 Niti-Setu AI Consultant • Experimental Agricultural Engine</p>
         </div>
       </footer>
     </div>

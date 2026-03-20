@@ -2,9 +2,16 @@ import express from 'express';
 import { MongoDBAtlasVectorSearch } from '@langchain/mongodb';
 import { GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { PromptTemplate } from '@langchain/core/prompts';
-import { createStuffDocumentsChain } from "langchain/chains/combine_documents";
-import { createRetrievalChain } from "langchain/chains/retrieval";
+import { createStuffDocumentsChain } from "@langchain/classic/chains/combine_documents";
+import { createRetrievalChain } from "@langchain/classic/chains/retrieval";
 import { MongoClient } from 'mongodb';
+import fs from 'fs';
+import path from 'path';
+
+const logError = (msg, err) => {
+    const errorMsg = `[${new Date().toISOString()}] ${msg}\n${err?.stack || err}\n\n`;
+    fs.appendFileSync('eligibility_error.log', errorMsg);
+};
 
 const router = express.Router();
 
@@ -32,7 +39,7 @@ async function getVectorStore() {
     const collection = mongoClient.db(DATABASE_NAME).collection(COLLECTION_NAME);
     
     const embeddings = new GoogleGenerativeAIEmbeddings({
-        modelName: "text-embedding-004", 
+        modelName: "gemini-embedding-2-preview", 
     });
 
     vectorStore = new MongoDBAtlasVectorSearch(embeddings, {
@@ -47,19 +54,21 @@ async function getVectorStore() {
 
 // System Prompt for our Eligibility Rules Engine
 const ELIGIBILITY_SYSTEM_PROMPT = `
-You are "Niti-Setu", an expert AI consultant for Indian Government Agricultural Schemes.
-You have been provided with official PDF scheme documents below.
+You are "Niti-Setu", a highly precise AI consultant specializing in Indian Government Agricultural Schemes.
+Your goal is to evaluate if a farmer is eligible for a specific scheme based ONLY on the provided guidelines.
 
-Examine the Farmer's Profile carefully. 
-Then, analyze the provided scheme guidelines and determine if the farmer is eligible.
+### Analysis Instructions:
+1. **Critical Review**: Match the farmer's profile (State, Landholding, Crop, Category) against the specific eligibility and exclusion criteria in the guidelines.
+2. **Strict Evidence**: You MUST identify the exact page or section that supports your decision.
+3. **Drafting the Reasoning**: Write a clear, encouraging, but firm explanation. 
 
-You MUST respond strictly in the following JSON format:
+### Mandatory JSON Output Format:
 {{
     "status": "Eligible" | "Not Eligible" | "Pending Review",
-    "reasoning": "A simple 2-3 sentence explanation for the farmer.",
-    "document_proof": "The exact wording or snippet from the provided guidelines that proves your decision.",
-    "citation": "Page X, Paragraph Y of [Scheme Name]",
-    "required_documents": ["List", "of", "required", "documents", "mentioned", "in", "the", "guidelines"]
+    "reasoning": "A concise 2-sentence explanation for the farmer.",
+    "document_proof": "The direct quote from the guidelines used to make this decision.",
+    "citation": "Official Document Name, Page X, Section Y",
+    "required_documents": ["Document A", "Document B", ...] 
 }}
 
 Context (Scheme Guidelines):
@@ -85,6 +94,7 @@ router.post('/check', async (req, res) => {
         console.log("Analyzing Profile:", profileText);
 
         const store = await getVectorStore();
+        console.log("Vector store initialized.");
         
         // Initialize Gemini Pro model
         const llm = new ChatGoogleGenerativeAI({
@@ -92,6 +102,13 @@ router.post('/check', async (req, res) => {
             temperature: 0, 
         });
 
+        console.log("Retrieving documents...");
+        // Use our Mongo Atlas Vector Store as the retriever (fetch top 4 closest document chunks)
+        const retriever = store.asRetriever({
+            k: 4, 
+        });
+
+        console.log("Creating chains...");
         // Create the Prompt Template
         const prompt = PromptTemplate.fromTemplate(ELIGIBILITY_SYSTEM_PROMPT);
 
@@ -100,41 +117,44 @@ router.post('/check', async (req, res) => {
             llm: llm,
             prompt: prompt,
         });
-
-        // Use our Mongo Atlas Vector Store as the retriever (fetch top 4 closest document chunks)
-        const retriever = store.asRetriever({
-            k: 4, 
-        });
+        console.log("Combine docs chain created.");
 
         const retrievalChain = await createRetrievalChain({
             combineDocsChain: documentChain,
             retriever: retriever,
         });
+        console.log("Retrieval chain created. Invoking...");
 
-        // Execute the RAG pipeline
-        const response = await retrievalChain.invoke({
-            input: profileText
-        });
+        try {
+            const response = await retrievalChain.invoke({
+                input: profileText
+            });
+            console.log("Response received from RAG chain.");
 
-        // Gemini should return a JSON string based on our prompt instruction.
-        // We'll clean it up in case it includes markdown backticks.
-        let rawAnswer = response.answer;
-        if (rawAnswer.startsWith('```json')) {
-            rawAnswer = rawAnswer.substring(7, rawAnswer.length - 3);
-        } else if (rawAnswer.startsWith('```')) {
-            rawAnswer = rawAnswer.substring(3, rawAnswer.length - 3);
+            let rawAnswer = response.answer;
+            // Robust cleaning of markdown blocks
+            rawAnswer = rawAnswer.replace(/```json/g, '').replace(/```/g, '').trim();
+
+            const jsonResult = JSON.parse(rawAnswer);
+
+            res.json({
+                success: true,
+                data: jsonResult
+            });
+        } catch (chainError) {
+            console.error("Chain Execution/Parsing Error:", chainError);
+            logError("Chain Execution/Parsing Error", chainError);
+            res.status(500).json({ 
+                success: false, 
+                error: 'The AI reasoning engine failed to parse the result. This usually happens if the LLM output was malformed.',
+                details: chainError.message 
+            });
         }
-
-        const jsonResult = JSON.parse(rawAnswer);
-
-        res.json({
-            success: true,
-            data: jsonResult
-        });
 
     } catch (error) {
         console.error("Eligibility Check Error:", error);
-        res.status(500).json({ success: false, error: 'Failed to process eligibility check.' });
+        logError("Eligibility Check Error", error);
+        res.status(500).json({ success: false, error: 'Internal Server Error. Please check backend logs.' });
     }
 });
 
