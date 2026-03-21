@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Loader2, ArrowLeft } from 'lucide-react';
-import LandingPage from './components/LandingPage';
-import ProfileForm from './components/ProfileForm';
-import ProofCard from './components/ProofCard';
+import LandingPage from './ui-ux/LandingPage';
+import ProfileForm from './ui-ux/ProfileForm';
+import ProofCard from './ui-ux/ProofCard';
 import './index.css';
 
 function App() {
