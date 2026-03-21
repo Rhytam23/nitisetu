@@ -72,7 +72,6 @@ const LanguageSelector = () => {
       {/* Required anchor for Google Translate Script */}
       <div id="google_translate_element" className="hidden"></div>
     </div>
-    </>
   );
 };
 
