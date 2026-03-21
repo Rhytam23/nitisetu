@@ -3,6 +3,7 @@ import { Loader2, ArrowLeft } from 'lucide-react';
 import LandingPage from './ui-ux/LandingPage';
 import ProfileForm from './ui-ux/ProfileForm';
 import ProofCard from './ui-ux/ProofCard';
+import LanguageSelector from './ui-ux/LanguageSelector';
 import './index.css';
 
 function App() {
@@ -73,9 +74,12 @@ function App() {
               <p className="text-brand-600 text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] hidden sm:block">Eligibility Engine</p>
             </div>
           </div>
-          <div className="hidden sm:flex bg-brand-50/80 backdrop-blur-md px-4 py-2 rounded-full border border-brand-200/50 text-[10px] font-black tracking-widest uppercase items-center gap-2 text-brand-800 shadow-sm">
-            <span className="w-2 h-2 rounded-full bg-brand-500 animate-pulse shadow-[0_0_8px_rgba(20,184,166,0.6)]"></span>
-            AI Consultant Active
+          <div className="flex items-center gap-2 sm:gap-3">
+            <LanguageSelector />
+            <div className="hidden sm:flex bg-brand-50/80 backdrop-blur-md px-4 py-2 rounded-full border border-brand-200/50 text-[10px] font-black tracking-widest uppercase items-center gap-2 text-brand-800 shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-brand-500 animate-pulse shadow-[0_0_8px_rgba(20,184,166,0.6)]"></span>
+              AI Consultant Active
+            </div>
           </div>
         </div>
       </header>
