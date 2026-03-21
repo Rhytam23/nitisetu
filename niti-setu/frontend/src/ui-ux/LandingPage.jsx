@@ -177,7 +177,7 @@ const LandingPage = ({ onGetStarted }) => {
               onClick={onGetStarted}
               className="w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-5 bg-gradient-to-r from-brand-400 to-brand-500 text-brand-950 rounded-full font-black text-lg sm:text-xl hover:scale-105 active:scale-95 shadow-[0_0_40px_rgba(45,212,191,0.4)] transition-all border border-brand-300/50"
             >
-              Launch Consultant Tool
+              Start Consultant Tool
             </button>
           </div>
       </section>
