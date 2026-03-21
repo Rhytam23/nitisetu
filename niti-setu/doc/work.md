@@ -15,6 +15,22 @@ This document outlines the current state of the Niti-Setu project, detailing wha
 *   **AI Integration**: Integrated LangChain and Google Generative AI (Gemini 1.5 Pro) to power the semantic search and reasoning engine.
 *   **High-Availability Fallback**: Designed and implemented a rock-solid logic-based fallback mechanism. If the MongoDB connection fails or the AI system times out, the backend seamlessly switches to pre-programmed rules extracted from official scheme guidelines (PM-KISAN, PM-KMY, PM-KUSUM), ensuring the API never crashes and always returns a valid response.
 *   **Data Ingestion Pipeline**: Created scripts to ingest official PDF guidelines and push them to a MongoDB Atlas Vector Store.
+*   **Health Route**: Added `GET /api/health` for quick backend status checks.
+*   **MongoDB Profile Storage**: Migrated profile APIs from dummy JSON storage to MongoDB using Mongoose.
+*   **Modular Data Model**: Added dedicated `backend/models/Farmer.js` and imported it into routes for cleaner architecture.
+*   **Profile APIs Implemented**:
+    *   `POST /api/profile` - create farmer profile
+    *   `GET /api/profile` - list all profiles
+    *   `GET /api/profile/:id` - fetch profile by ID
+    *   `PUT /api/profile/:id` - update profile
+    *   `DELETE /api/profile/:id` - delete profile
+*   **Validation Layer Added**:
+    *   Required fields: `name`, `state`
+    *   Numeric checks: `land_acres >= 0`, `age` in valid range
+    *   Identity format checks: `phone` (10 digits), `aadhaar` (12 digits)
+*   **Operational Hardening**:
+    *   Error logging support via `eligibility_error.log`
+    *   Server starts even if MongoDB is unavailable, so fallback and profile APIs stay usable.
 
 ---
 
@@ -22,10 +38,12 @@ This document outlines the current state of the Niti-Setu project, detailing wha
 
 Currently, the application relies heavily on the "Fallback Engine" because the live connection to the MongoDB Atlas Vector Store in the deployed environment has network/IP whitelist issues. The following core elements remain incomplete:
 
-1.  **Live Database Binding**: The RAG (Retrieval-Augmented Generation) pipeline cannot retrieve live vector embeddings because the MongoDB connection is timing out.
-2.  **Multilingual Support**: Rural farmers require interfaces and AI responses in regional languages (Hindi, Marathi, Tamil, etc.), which is currently missing.
-3.  **Voice Interaction**: The platform assumes the user can read and write English, which is a major barrier for the target demographic.
-4.  **Persistent User Profiles**: Farmers must re-enter their details every time; there is no login or session management.
+1.  **Live Database Binding**: RAG vector retrieval is blocked by MongoDB Atlas connection/network issues in current environment.
+2.  **Profile Data Layer Hardening**: Add repository/service abstraction and DB indexes (unique phone/aadhaar) for safer scale.
+3.  **Authentication & Identity**: No login/session/OTP flow yet for farmer-specific history and secure profile ownership.
+4.  **Multilingual Support**: Rural farmers require interfaces and AI responses in regional languages (Hindi, Marathi, Tamil, etc.).
+5.  **Voice Interaction**: The platform still assumes typed input; speech input/output is not integrated.
+6.  **Automated Testing**: Need route-level tests for profile CRUD, validation, and eligibility fallback behavior.
 
 ---
 
@@ -50,6 +68,7 @@ To transition Niti-Setu from a prototype to an "actual useful level," the follow
 ### Phase 3: User Management & Data Capture
 **Goal**: Create a sticky, personalized experience.
 *   **Action 1 (Authentication)**: Implement a frictionless login system (Mobile Number + OTP) using Firebase Auth or a similar service.
+*   **Action 1.1 (Profile Service Refactor)**: Move profile DB logic from route handlers into a service/repository layer for maintainability and testability.
 *   **Action 2 (Document OCR)**: Integrate an Optical Character Recognition (OCR) library (like Tesseract.js or Google Cloud Vision).
     *   *Implementation*: Allow the user to take a photo of their Aadhaar card or Jamabandi (land record). The backend will parse the image, extract the name and acreage, and auto-fill the eligibility form.
 
@@ -60,3 +79,18 @@ To transition Niti-Setu from a prototype to an "actual useful level," the follow
     *   *Frontend*: Vercel, Netlify, or AWS Amplify.
     *   *Backend*: Render, Heroku, or AWS Elastic Container Service (ECS).
 *   **Action 3 (Monitoring)**: Integrate an error tracking service (like Sentry or Datadog) to monitor production crashes or AI hallucinations.
+
+---
+
+## 4. Immediate Next Sprint (Recommended)
+
+1. **Stabilize API Contracts**
+   * Add unified response format for all profile routes (`success`, `message`, `data`, `error`, `details`).
+2. **Improve Data Quality**
+   * Add duplicate checks for `phone` and `aadhaar` during create/update.
+3. **Testing**
+   * Add API tests for `POST/GET/PUT/DELETE /api/profile`.
+   * Add fallback tests for `/api/check` when MongoDB is unreachable.
+4. **Data Layer Cleanup**
+   * Add repository layer around `Farmer` model.
+   * Add indexes and duplicate checks (`phone`, `aadhaar`) without changing endpoint contracts.

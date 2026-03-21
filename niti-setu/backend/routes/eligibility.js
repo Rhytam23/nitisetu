@@ -5,8 +5,90 @@ import { PromptTemplate } from '@langchain/core/prompts';
 import { createStuffDocumentsChain } from "@langchain/classic/chains/combine_documents";
 import { createRetrievalChain } from "@langchain/classic/chains/retrieval";
 import { MongoClient } from 'mongodb';
+import mongoose from 'mongoose';
 import fs from 'fs';
-import path from 'path';
+import Farmer from '../models/Farmer.js';
+
+function validateProfileInput(profile, { partial = false } = {}) {
+    const errors = [];
+    const has = (key) => Object.prototype.hasOwnProperty.call(profile, key);
+
+    if (!partial || has('name')) {
+        if (!profile.name || String(profile.name).trim().length < 2) {
+            errors.push('name must be at least 2 characters');
+        }
+    }
+
+    if (!partial || has('state')) {
+        if (!profile.state || String(profile.state).trim().length < 2) {
+            errors.push('state is required');
+        }
+    }
+
+    if (has('land_acres')) {
+        const acres = Number(profile.land_acres);
+        if (!Number.isFinite(acres) || acres < 0) {
+            errors.push('land_acres must be a non-negative number');
+        }
+    }
+
+    if (has('age') && profile.age !== null && profile.age !== '') {
+        const age = Number(profile.age);
+        if (!Number.isInteger(age) || age < 18 || age > 100) {
+            errors.push('age must be an integer between 18 and 100');
+        }
+    }
+
+    if (has('phone') && profile.phone) {
+        const phone = String(profile.phone).replace(/\D/g, '');
+        if (phone.length !== 10) {
+            errors.push('phone must be a 10-digit number');
+        }
+    }
+
+    if (has('aadhaar') && profile.aadhaar) {
+        const aadhaar = String(profile.aadhaar).replace(/\D/g, '');
+        if (aadhaar.length !== 12) {
+            errors.push('aadhaar must be a 12-digit number');
+        }
+    }
+
+    return errors;
+}
+
+function buildProfilePayload(profile, { isUpdate = false } = {}) {
+    const normalized = {
+        ...profile
+    };
+
+    if (Object.prototype.hasOwnProperty.call(profile, 'name')) {
+        normalized.name = String(profile.name).trim();
+    }
+    if (Object.prototype.hasOwnProperty.call(profile, 'state')) {
+        normalized.state = String(profile.state).trim();
+    }
+    if (Object.prototype.hasOwnProperty.call(profile, 'crop')) {
+        normalized.crop = String(profile.crop || '').trim();
+    }
+    if (Object.prototype.hasOwnProperty.call(profile, 'land_acres')) {
+        normalized.land_acres = Number(profile.land_acres) || 0;
+    }
+    if (Object.prototype.hasOwnProperty.call(profile, 'age')) {
+        normalized.age = profile.age === null || profile.age === '' ? null : parseInt(profile.age, 10);
+    }
+    if (Object.prototype.hasOwnProperty.call(profile, 'phone')) {
+        normalized.phone = String(profile.phone || '').replace(/\D/g, '');
+    }
+    if (Object.prototype.hasOwnProperty.call(profile, 'aadhaar')) {
+        normalized.aadhaar = String(profile.aadhaar || '').replace(/\D/g, '');
+    }
+
+    if (isUpdate) {
+        normalized.updatedAt = new Date().toISOString();
+    }
+
+    return normalized;
+}
 
 const logError = (msg, err) => {
     const errorMsg = `[${new Date().toISOString()}] ${msg}\n${err?.stack || err}\n\n`;
@@ -187,10 +269,124 @@ router.post('/check', async (req, res) => {
     }
 });
 
-// A dummy profile saving endpoint
-router.post('/profile', (req, res) => {
-    // In a full application, save `req.body` to MongoDB
-    res.json({ success: true, message: "Profile saved successfully." });
+// ---------- Farmer Profile API (uses MongoDB) ----------
+
+/** POST /api/profile - Create a new farmer profile */
+router.post('/profile', async (req, res) => {
+    try {
+        const profile = req.body;
+
+        const errors = validateProfileInput(profile);
+        if (errors.length > 0) {
+            return res.status(400).json({
+                success: false,
+                error: 'Validation failed',
+                details: errors
+            });
+        }
+
+        const newFarmer = buildProfilePayload(profile);
+        const createdFarmer = await Farmer.create(newFarmer);
+
+        res.status(201).json({
+            success: true,
+            message: 'Profile saved successfully.',
+            data: createdFarmer
+        });
+    } catch (err) {
+        logError('POST /profile failed', err);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/** GET /api/profile - List all farmer profiles */
+router.get('/profile', async (req, res) => {
+    try {
+        const farmers = await Farmer.find().sort({ createdAt: -1 });
+        res.json({ success: true, count: farmers.length, data: farmers });
+    } catch (err) {
+        logError('GET /profile failed', err);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/** GET /api/profile/:id - Get a single farmer by ID */
+router.get('/profile/:id', async (req, res) => {
+    try {
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            return res.status(400).json({ success: false, error: 'Invalid farmer id' });
+        }
+        const farmer = await Farmer.findById(req.params.id);
+        if (!farmer) {
+            return res.status(404).json({ success: false, error: 'Farmer not found' });
+        }
+        res.json({ success: true, data: farmer });
+    } catch (err) {
+        logError('GET /profile/:id failed', err);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/** PUT /api/profile/:id - Update a farmer profile */
+router.put('/profile/:id', async (req, res) => {
+    try {
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            return res.status(400).json({ success: false, error: 'Invalid farmer id' });
+        }
+        const errors = validateProfileInput(req.body, { partial: true });
+        if (errors.length > 0) {
+            return res.status(400).json({
+                success: false,
+                error: 'Validation failed',
+                details: errors
+            });
+        }
+
+        const updates = buildProfilePayload(req.body, { isUpdate: true });
+        delete updates.createdAt;
+        delete updates._id;
+
+        const updatedFarmer = await Farmer.findByIdAndUpdate(
+            req.params.id,
+            { $set: updates },
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedFarmer) {
+            return res.status(404).json({ success: false, error: 'Farmer not found' });
+        }
+
+        res.json({
+            success: true,
+            message: 'Profile updated successfully.',
+            data: updatedFarmer
+        });
+    } catch (err) {
+        logError('PUT /profile/:id failed', err);
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+/** DELETE /api/profile/:id - Delete a farmer profile */
+router.delete('/profile/:id', async (req, res) => {
+    try {
+        if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+            return res.status(400).json({ success: false, error: 'Invalid farmer id' });
+        }
+        const deletedFarmer = await Farmer.findByIdAndDelete(req.params.id);
+        if (!deletedFarmer) {
+            return res.status(404).json({ success: false, error: 'Farmer not found' });
+        }
+
+        res.json({
+            success: true,
+            message: 'Profile deleted successfully.',
+            data: deletedFarmer
+        });
+    } catch (err) {
+        logError('DELETE /profile/:id failed', err);
+        res.status(500).json({ success: false, error: err.message });
+    }
 });
 
 export default router;
