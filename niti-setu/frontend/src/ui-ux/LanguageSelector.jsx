@@ -19,8 +19,6 @@ const languages = [
 const LanguageSelector = () => {
   const [currentLang, setCurrentLang] = useState('en');
 
-  const [isTranslating, setIsTranslating] = useState(false);
-
   useEffect(() => {
     // Read the current language from the googtrans cookie to persist state across reloads
     const match = document.cookie.match(/googtrans=\/en\/([a-z-]{2,5})/i);
@@ -32,39 +30,22 @@ const LanguageSelector = () => {
   const handleLanguageChange = (e) => {
     const selectedLang = e.target.value;
     setCurrentLang(selectedLang);
-    setIsTranslating(true); // Trigger the elegant loading screen
     
-    // Google Translate uses cookies formatted exactly like: /en/hi (source/target)
-    if (selectedLang === 'en') {
-      // Clear cookie to revert to native English
-      document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-      document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=' + window.location.hostname + '; path=/;';
+    // Programmatically trigger the hidden Google Translate dropdown
+    // This translates the page instantly IN PLACE without needing a reload or loading screen!
+    const gtSelect = document.querySelector('.goog-te-combo');
+    if (gtSelect) {
+      gtSelect.value = selectedLang;
+      gtSelect.dispatchEvent(new Event('change'));
     } else {
-      // Set rigorous cookie for auto-translation on next reload
+      // Fallback if the Google script hasn't fully loaded the combo box yet
       const cookieValue = `/en/${selectedLang}`;
       document.cookie = `googtrans=${cookieValue}; path=/;`;
-      if (window.location.hostname !== 'localhost') {
-        document.cookie = `googtrans=${cookieValue}; domain=.${window.location.hostname}; path=/;`;
-      }
-    }
-    
-    // Wait precisely 2 seconds for a premium UX feel before reloading
-    setTimeout(() => {
       window.location.reload();
-    }, 2000);
+    }
   };
 
   return (
-    <>
-      {/* 2-Second Translation Interstitial Overlay */}
-      {isTranslating && (
-        <div className="fixed inset-0 z-[999] flex flex-col items-center justify-center bg-white/80 backdrop-blur-xl animate-fade-in transition-all duration-300">
-          <div className="w-16 h-16 sm:w-20 sm:h-20 border-4 border-brand-200 border-t-brand-500 rounded-full animate-spin mb-6 sm:mb-8 shadow-[0_0_30px_rgba(20,184,166,0.3)]"></div>
-          <h2 className="text-2xl sm:text-3xl font-black text-brand-950 tracking-tight mb-2">Switching Language Region...</h2>
-          <p className="text-brand-600 font-bold uppercase tracking-[0.2em] text-[10px] sm:text-xs">Applying Cultural Localization Matrix</p>
-        </div>
-      )}
-
     <div className="relative inline-flex items-center gap-1.5 sm:gap-2 bg-white/70 backdrop-blur-md px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-brand-200/50 shadow-sm transition-all hover:shadow-md cursor-pointer group">
       <Globe className="w-4 h-4 sm:w-5 sm:h-5 text-brand-600 group-hover:text-brand-800 transition-colors" />
       <select
