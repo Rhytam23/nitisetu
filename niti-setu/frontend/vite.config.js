@@ -8,4 +8,7 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  preview: {
+    allowedHosts: ['kind-caring-production-fe85.up.railway.app']
+  }
 })
