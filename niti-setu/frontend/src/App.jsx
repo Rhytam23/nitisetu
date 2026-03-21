@@ -131,10 +131,50 @@ function App() {
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="py-8 sm:py-10 border-t border-brand-100/50 mt-12 sm:mt-20 relative z-10 px-4">
-        <div className="max-w-4xl mx-auto text-center text-brand-900/40 text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em]">
-          <p>© 2026 Niti-Setu AI Consultant • Experimental Agricultural Engine</p>
+      {/* Premium Footer */}
+      <footer className="py-12 sm:py-16 border-t border-brand-100/50 mt-12 sm:mt-20 bg-white/40 backdrop-blur-xl relative z-10 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12 mb-12 sm:mb-16">
+            
+            {/* Brand Column */}
+            <div className="md:col-span-2 space-y-4">
+              <div>
+                <h2 className="text-xl sm:text-2xl font-black tracking-tight text-brand-950">Niti-Setu</h2>
+                <p className="text-brand-600 text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em]">Eligibility Engine</p>
+              </div>
+              <p className="text-brand-900/60 text-sm font-medium leading-relaxed max-w-sm">
+                Empowering Indian farmers by translating complex bureaucratic scheme guidelines into instant, accessible, and voice-activated clarity.
+              </p>
+            </div>
+
+            {/* Quick Links */}
+            <div>
+              <h4 className="text-brand-950 font-bold mb-4">Quick Links</h4>
+              <ul className="space-y-2 text-sm text-brand-900/70 font-medium">
+                <li><a href="#" className="hover:text-brand-600 transition-colors">How it Works</a></li>
+                <li><a href="#" className="hover:text-brand-600 transition-colors">Supported Schemes</a></li>
+                <li><a href="#" className="hover:text-brand-600 transition-colors">Data Privacy</a></li>
+                <li><a href="#" className="hover:text-brand-600 transition-colors">Help Center</a></li>
+              </ul>
+            </div>
+
+            {/* Legal / Contact */}
+            <div>
+              <h4 className="text-brand-950 font-bold mb-4">Legal</h4>
+              <ul className="space-y-2 text-sm text-brand-900/70 font-medium">
+                <li><a href="#" className="hover:text-brand-600 transition-colors">Terms of Service</a></li>
+                <li><a href="#" className="hover:text-brand-600 transition-colors">Privacy Policy</a></li>
+                <li><a href="#" className="hover:text-brand-600 transition-colors">Official Portal</a></li>
+              </ul>
+            </div>
+            
+          </div>
+
+          {/* Bottom Bar */}
+          <div className="pt-8 border-t border-brand-200/50 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left text-brand-900/40 text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em]">
+            <p>© 2026 Niti-Setu AI Consultant</p>
+            <p>Experimental Agricultural Engine</p>
+          </div>
         </div>
       </footer>
     </div>
