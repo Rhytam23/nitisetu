@@ -114,13 +114,13 @@ const ProfileForm = ({ onProfileSubmit }) => {
   };
 
   return (
-    <div className="bg-white/60 backdrop-blur-2xl rounded-[1.5rem] sm:rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/80 p-5 sm:p-8 w-full max-w-2xl mx-auto relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-brand-200/20 blur-2xl sm:blur-3xl rounded-full pointer-events-none"></div>
+    <div className="bg-white/5 backdrop-blur-3xl rounded-[1.5rem] sm:rounded-[2rem] shadow-[0_30px_60px_rgba(0,0,0,0.5)] border border-white/10 p-5 sm:p-8 w-full max-w-2xl mx-auto relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-brand-500/20 blur-3xl sm:blur-[60px] rounded-full pointer-events-none"></div>
       
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8 relative z-10">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-black text-brand-950 tracking-tight">Farmer Profile</h2>
-          <p className="text-brand-900/60 font-medium text-sm sm:text-base">Fill manually or use voice to assist</p>
+          <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight drop-shadow-sm">Farmer Profile</h2>
+          <p className="text-slate-400 font-medium text-sm sm:text-base">Fill manually or use voice to assist</p>
         </div>
         
         {/* Voice Interface Button */}
@@ -129,22 +129,22 @@ const ProfileForm = ({ onProfileSubmit }) => {
           onClick={toggleListening}
           className={`flex items-center justify-center gap-2 px-5 py-3 sm:py-3 rounded-full shadow-lg transition-all border w-full sm:w-auto ${
             isListening 
-              ? 'bg-red-500 hover:bg-red-600 text-white border-red-400 animate-pulse shadow-red-500/30' 
-              : 'bg-white text-brand-700 border-white hover:bg-brand-50 shadow-brand-500/10'
+              ? 'bg-red-500 hover:bg-red-600 text-white border-red-400 animate-pulse shadow-[0_0_20px_rgba(239,68,68,0.5)]' 
+              : 'bg-white/5 text-slate-300 border-white/10 hover:bg-white/10 shadow-[0_0_15px_rgba(255,255,255,0.05)]'
           }`}
         >
-          {isListening ? <MicOff size={18} className="sm:w-5 sm:h-5" /> : <Mic size={18} className={`sm:w-5 sm:h-5 ${isListening ? '' : 'text-brand-500'}`} />}
+          {isListening ? <MicOff size={18} className="sm:w-5 sm:h-5" /> : <Mic size={18} className={`sm:w-5 sm:h-5 ${isListening ? '' : 'text-brand-400'}`} />}
           <span className="font-bold text-xs sm:text-sm tracking-wide">{isListening ? 'Stop Listening' : 'Voice Input'}</span>
         </button>
       </div>
 
       {isListening && (
-        <div className="mb-6 sm:mb-8 bg-brand-50/80 backdrop-blur-md p-4 sm:p-5 rounded-xl sm:rounded-2xl border border-brand-100/50 shadow-inner">
-          <p className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-brand-600 mb-2 flex items-center gap-2">
+        <div className="mb-6 sm:mb-8 bg-red-500/10 backdrop-blur-md p-4 sm:p-5 rounded-xl sm:rounded-2xl border border-red-500/20 shadow-inner">
+          <p className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-red-400 mb-2 flex items-center gap-2">
             <Volume2 size={14} className="animate-pulse" />
             Listening Stream
           </p>
-          <p className="text-brand-950 font-medium italic text-base sm:text-lg">"{voiceText || 'Speak now...'}"</p>
+          <p className="text-white font-medium italic text-base sm:text-lg">"{voiceText || 'Speak now...'}"</p>
         </div>
       )}
 
@@ -152,58 +152,58 @@ const ProfileForm = ({ onProfileSubmit }) => {
       <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           <div className="group">
-            <label className="block text-[10px] sm:text-xs font-bold uppercase tracking-widest text-brand-900/60 mb-2">State</label>
+            <label className="block text-[10px] sm:text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">State</label>
             <input 
               type="text" name="state" value={profile.state} onChange={handleChange}
-              className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-white/50 backdrop-blur-sm border border-brand-100/50 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-brand-400 focus:border-brand-400 outline-none transition-all shadow-sm group-hover:bg-white text-brand-950 font-medium text-sm sm:text-base"
+              className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-black/20 backdrop-blur-sm border border-white/10 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all shadow-sm group-hover:bg-white/5 text-white font-medium text-sm sm:text-base placeholder-slate-600"
               placeholder="e.g. Uttar Pradesh"
             />
           </div>
           <div className="group">
-            <label className="block text-[10px] sm:text-xs font-bold uppercase tracking-widest text-brand-900/60 mb-2">Land Holding (Acres)</label>
+            <label className="block text-[10px] sm:text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Land Holding (Acres)</label>
             <input 
               type="number" step="0.1" name="land_acres" value={profile.land_acres} onChange={handleChange}
-              className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-white/50 backdrop-blur-sm border border-brand-100/50 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-brand-400 focus:border-brand-400 outline-none transition-all shadow-sm group-hover:bg-white text-brand-950 font-medium text-sm sm:text-base"
+              className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-black/20 backdrop-blur-sm border border-white/10 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all shadow-sm group-hover:bg-white/5 text-white font-medium text-sm sm:text-base placeholder-slate-600"
               placeholder="e.g. 2.5"
             />
           </div>
           <div className="group">
-            <label className="block text-[10px] sm:text-xs font-bold uppercase tracking-widest text-brand-900/60 mb-2">Crop Type</label>
+            <label className="block text-[10px] sm:text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Crop Type</label>
             <input 
               type="text" name="crop" value={profile.crop} onChange={handleChange}
-              className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-white/50 backdrop-blur-sm border border-brand-100/50 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-brand-400 focus:border-brand-400 outline-none transition-all shadow-sm group-hover:bg-white text-brand-950 font-medium text-sm sm:text-base"
+              className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-black/20 backdrop-blur-sm border border-white/10 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all shadow-sm group-hover:bg-white/5 text-white font-medium text-sm sm:text-base placeholder-slate-600"
               placeholder="e.g. Wheat, Rice"
             />
           </div>
           <div className="group">
-            <label className="block text-[10px] sm:text-xs font-bold uppercase tracking-widest text-brand-900/60 mb-2">Social Category</label>
+            <label className="block text-[10px] sm:text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Social Category</label>
             <div className="relative">
               <select 
                 name="social_category" value={profile.social_category} onChange={handleChange}
-                className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-white/50 backdrop-blur-sm border border-brand-100/50 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-brand-400 focus:border-brand-400 outline-none transition-all shadow-sm group-hover:bg-white text-brand-950 font-medium text-sm sm:text-base appearance-none"
+                className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-black/20 backdrop-blur-sm border border-white/10 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all shadow-sm group-hover:bg-white/5 text-white font-medium text-sm sm:text-base appearance-none"
               >
-                <option value="General">General</option>
-                <option value="OBC">OBC</option>
-                <option value="SC">SC</option>
-                <option value="ST">ST</option>
+                <option value="General" className="bg-slate-900 text-white">General</option>
+                <option value="OBC" className="bg-slate-900 text-white">OBC</option>
+                <option value="SC" className="bg-slate-900 text-white">SC</option>
+                <option value="ST" className="bg-slate-900 text-white">ST</option>
               </select>
-              <div className="absolute right-4 sm:right-5 top-1/2 -translate-y-1/2 pointer-events-none text-brand-500">
+              <div className="absolute right-4 sm:right-5 top-1/2 -translate-y-1/2 pointer-events-none text-brand-400">
                 <Target size={16} />
               </div>
             </div>
           </div>
         </div>
 
-        <div className="pt-4 sm:pt-6 mt-2 sm:mt-4 border-t border-brand-100/50">
-          <label className="block text-[10px] sm:text-xs font-bold uppercase tracking-widest text-brand-900/60 mb-3 sm:mb-4">Select Scheme for Eligibility Check</label>
+        <div className="pt-4 sm:pt-6 mt-2 sm:mt-4 border-t border-white/5">
+          <label className="block text-[10px] sm:text-xs font-bold uppercase tracking-widest text-slate-400 mb-3 sm:mb-4">Select Scheme for Eligibility Check</label>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-             <label className={`flex items-center gap-3 cursor-pointer p-3 sm:p-4 border rounded-xl sm:rounded-2xl flex-1 transition-all ${profile.scheme === 'PM-KISAN' ? 'bg-brand-50 border-brand-400 shadow-sm' : 'bg-white/50 border-brand-100/50 hover:bg-white'}`}>
-               <input type="radio" name="scheme" value="PM-KISAN" checked={profile.scheme === 'PM-KISAN'} onChange={handleChange} className="w-5 h-5 text-brand-600 focus:ring-brand-500"/>
-               <span className="font-bold text-brand-950 text-sm sm:text-base">PM-KISAN</span>
+             <label className={`flex items-center gap-3 cursor-pointer p-3 sm:p-4 border rounded-xl sm:rounded-2xl flex-1 transition-all ${profile.scheme === 'PM-KISAN' ? 'bg-brand-500/20 border-brand-500 shadow-[0_0_15px_rgba(16,185,129,0.2)]' : 'bg-black/20 border-white/10 hover:bg-white/5'}`}>
+               <input type="radio" name="scheme" value="PM-KISAN" checked={profile.scheme === 'PM-KISAN'} onChange={handleChange} className="w-5 h-5 text-brand-500 focus:ring-brand-500 bg-black/20 border-white/10"/>
+               <span className="font-bold text-white text-sm sm:text-base">PM-KISAN</span>
              </label>
-             <label className={`flex items-center gap-3 cursor-pointer p-3 sm:p-4 border rounded-xl sm:rounded-2xl flex-1 transition-all ${profile.scheme === 'PM-KUSUM' ? 'bg-brand-50 border-brand-400 shadow-sm' : 'bg-white/50 border-brand-100/50 hover:bg-white'}`}>
-               <input type="radio" name="scheme" value="PM-KUSUM" checked={profile.scheme === 'PM-KUSUM'} onChange={handleChange} className="w-5 h-5 text-brand-600 focus:ring-brand-500"/>
-               <span className="font-bold text-brand-950 text-sm sm:text-base">PM-KUSUM</span>
+             <label className={`flex items-center gap-3 cursor-pointer p-3 sm:p-4 border rounded-xl sm:rounded-2xl flex-1 transition-all ${profile.scheme === 'PM-KUSUM' ? 'bg-brand-500/20 border-brand-500 shadow-[0_0_15px_rgba(16,185,129,0.2)]' : 'bg-black/20 border-white/10 hover:bg-white/5'}`}>
+               <input type="radio" name="scheme" value="PM-KUSUM" checked={profile.scheme === 'PM-KUSUM'} onChange={handleChange} className="w-5 h-5 text-brand-500 focus:ring-brand-500 bg-black/20 border-white/10"/>
+               <span className="font-bold text-white text-sm sm:text-base">PM-KUSUM</span>
              </label>
           </div>
         </div>
@@ -211,7 +211,7 @@ const ProfileForm = ({ onProfileSubmit }) => {
         <div className="pt-6 sm:pt-8">
           <button 
             type="submit"
-            className="w-full flex items-center justify-center gap-2 bg-brand-600 hover:bg-brand-500 text-white font-black py-3 sm:py-4 px-6 rounded-xl sm:rounded-2xl transition-all shadow-[0_8px_20px_rgba(13,148,136,0.3)] hover:shadow-[0_12px_25px_rgba(13,148,136,0.4)] hover:-translate-y-1 text-sm sm:text-base"
+            className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-brand-500 to-brand-400 hover:from-brand-400 hover:to-cyan-400 text-slate-950 font-black py-3 sm:py-4 px-6 rounded-xl sm:rounded-2xl transition-all shadow-[0_0_30px_rgba(16,185,129,0.3)] hover:shadow-[0_0_50px_rgba(16,185,129,0.5)] hover:-translate-y-1 text-sm sm:text-base"
           >
             <Target size={20} className="sm:w-[22px] sm:h-[22px]" />
             Check Eligibility Now

@@ -46,19 +46,19 @@ const LanguageSelector = () => {
   };
 
   return (
-    <div className="relative inline-flex items-center gap-1.5 sm:gap-2 bg-white/70 backdrop-blur-md px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-brand-200/50 shadow-sm transition-all hover:shadow-md cursor-pointer group">
-      <Globe className="w-4 h-4 sm:w-5 sm:h-5 text-brand-600 group-hover:text-brand-800 transition-colors" />
+    <div className="relative inline-flex items-center gap-1.5 sm:gap-2 bg-white/5 backdrop-blur-md px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-white/10 shadow-[0_0_15px_rgba(0,0,0,0.5)] transition-all hover:bg-white/10 cursor-pointer group">
+      <Globe className="w-4 h-4 sm:w-5 sm:h-5 text-brand-400 group-hover:text-cyan-400 transition-colors" />
       <select
         value={currentLang}
         onChange={handleLanguageChange}
-        className="appearance-none bg-transparent border-none text-xs sm:text-sm font-black text-brand-900 focus:outline-none cursor-pointer pr-4 sm:pr-5 uppercase tracking-widest translate-y-[1px]"
+        className="appearance-none bg-transparent border-none text-xs sm:text-sm font-black text-white focus:outline-none cursor-pointer pr-4 sm:pr-5 uppercase tracking-widest translate-y-[1px]"
         style={{
           WebkitAppearance: 'none',
           MozAppearance: 'none'
         }}
       >
         {languages.map(lang => (
-          <option key={lang.code} value={lang.code} className="text-gray-900 bg-white shadow-lg border-b border-gray-100 uppercase tracking-widest font-bold">
+          <option key={lang.code} value={lang.code} className="text-white bg-slate-900 border-b border-white/10 uppercase tracking-widest font-bold">
             {lang.label}
           </option>
         ))}
