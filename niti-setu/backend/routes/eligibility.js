@@ -7,7 +7,16 @@ import { createRetrievalChain } from "@langchain/classic/chains/retrieval";
 import { MongoClient } from 'mongodb';
 import mongoose from 'mongoose';
 import fs from 'fs';
-import Farmer from '../models/Farmer.js';
+import FarmerRepository from '../repositories/FarmerRepository.js';
+
+const sendResponse = (res, statusCode, success, message, data = null, error = null, details = null) => {
+    const payload = { success };
+    if (message) payload.message = message;
+    if (data) payload.data = data;
+    if (error) payload.error = error;
+    if (details) payload.details = details;
+    return res.status(statusCode).json(payload);
+};
 
 function validateProfileInput(profile, { partial = false } = {}) {
     const errors = [];
@@ -152,11 +161,13 @@ Your goal is to evaluate if a farmer is eligible for a specific scheme based ONL
 ### Mandatory JSON Output Format:
 {{
     "status": "Eligible" | "Not Eligible" | "Pending Review",
-    "reasoning": "A concise 2-sentence explanation for the farmer.",
-    "document_proof": "The EXACT, VERBATIM quote from the provided context supporting this decision.",
+    "reasoning": "A concise 2-sentence explanation for the farmer in {language}.",
+    "document_proof": "The EXACT, VERBATIM quote from the provided context supporting this decision (Keep this in the original document language).",
     "citation": "Name of the Source Document",
     "required_documents": ["Document A", "Document B", ...] 
 }}
+
+IMPORTANT: The "reasoning" MUST be written in {language}. 
 
 Context (Scheme Guidelines):
 {context}
@@ -166,18 +177,24 @@ Farmer Profile:
 `;
 
 router.post('/check', async (req, res) => {
-    const farmerProfile = req.body;
     let jsonResult;
     let usedMock = false;
 
     try {
         // 1. Defensively construct profile text
-        const state = farmerProfile.state || 'Unknown';
-        const land_acres = parseFloat(farmerProfile.land_acres) || 0;
-        const crop = farmerProfile.crop || 'Unknown';
-        const scheme = farmerProfile.scheme || 'General';
+        const { state, land_acres, crop, scheme, phone, preferred_language = 'en' } = req.body;
         
-        let profileText = `Farmer from ${state}, Landholding: ${land_acres} acres, Crop: ${crop}. Checking: ${scheme}`;
+        // Map common codes to full names for the AI prompt
+        const langNames = {
+            'hi': 'Hindi', 'mr': 'Marathi', 'ta': 'Tamil', 'te': 'Telugu',
+            'bn': 'Bengali', 'gu': 'Gujarati', 'kn': 'Kannada', 'ml': 'Malayalam',
+            'pa': 'Punjabi', 'en': 'English'
+        };
+        const targetLanguage = langNames[preferred_language] || 'English'; // Default to English if code not found
+
+        const farmerProfile = { state, land_acres, crop, scheme, phone };
+        
+        let profileText = `Farmer from ${farmerProfile.state || 'Unknown'}, Landholding: ${parseFloat(farmerProfile.land_acres) || 0} acres, Crop: ${farmerProfile.crop || 'Unknown'}. Checking: ${farmerProfile.scheme || 'General'}`;
         console.log("Analyzing Profile:", profileText);
 
         // 2. Wrap ALL AI/DB logic in its own try/catch to ensure fallback
@@ -204,7 +221,11 @@ router.post('/check', async (req, res) => {
 
             // 3. Format the prompt and invoke the LLM safely
             const promptTemplate = PromptTemplate.fromTemplate(ELIGIBILITY_SYSTEM_PROMPT);
-            const finalPrompt = await promptTemplate.format({ context: formattedContext, input: profileText });
+            const finalPrompt = await promptTemplate.format({ 
+                context: formattedContext, 
+                input: profileText,
+                language: targetLanguage 
+            });
             
             const response = await llm.invoke(finalPrompt);
             
@@ -262,20 +283,12 @@ router.post('/check', async (req, res) => {
             };
         }
 
-        res.json({
-            success: true,
-            data: jsonResult,
-            engine: usedMock ? "Logic-Fallback" : "RAG-AI"
-        });
+        return sendResponse(res, 200, true, "Eligibility checked successfully.", jsonResult, null, { engine: usedMock ? "Logic-Fallback" : "RAG-AI" });
 
     } catch (fatalError) {
         console.error("FATAL Eligibility Error:", fatalError);
         logError("FATAL Eligibility Error", fatalError);
-        res.status(500).json({ 
-            success: false, 
-            error: 'A critical error occurred in the Niti-Setu processing layer.',
-            details: fatalError.message 
-        });
+        return sendResponse(res, 500, false, null, null, 'A critical error occurred in the Niti-Setu processing layer.', fatalError.message);
     }
 });
 
@@ -285,133 +298,109 @@ router.post('/check', async (req, res) => {
 router.post('/profile', async (req, res) => {
     try {
         if (mongoose.connection.readyState !== 1) {
-            return res.status(503).json({ success: false, error: 'Database is offline. Profile saving unavailable.' });
+            return sendResponse(res, 503, false, null, null, 'Database is offline. Profile saving unavailable.');
         }
         const profile = req.body;
 
         const errors = validateProfileInput(profile);
         if (errors.length > 0) {
-            return res.status(400).json({
-                success: false,
-                error: 'Validation failed',
-                details: errors
-            });
+            return sendResponse(res, 400, false, null, null, 'Validation failed', errors);
         }
 
         const newFarmer = buildProfilePayload(profile);
-        const createdFarmer = await Farmer.create(newFarmer);
+        const createdFarmer = await FarmerRepository.create(newFarmer);
 
-        res.status(201).json({
-            success: true,
-            message: 'Profile saved successfully.',
-            data: createdFarmer
-        });
+        return sendResponse(res, 201, true, 'Profile saved successfully.', createdFarmer);
     } catch (err) {
         if (err.code === 11000) {
             const field = Object.keys(err.keyValue)[0];
-            return res.status(409).json({ success: false, error: `A profile with this ${field} already exists.` });
+            return sendResponse(res, 409, false, null, null, `A profile with this ${field} already exists.`);
         }
         logError('POST /profile failed', err);
-        res.status(500).json({ success: false, error: err.message });
+        return sendResponse(res, 500, false, null, null, 'Internal Server Error', err.message);
     }
 });
 
 /** GET /api/profile - List all farmer profiles */
 router.get('/profile', async (req, res) => {
     try {
-        if (mongoose.connection.readyState !== 1) return res.status(503).json({ success: false, error: 'Database offline' });
-        const farmers = await Farmer.find().sort({ createdAt: -1 });
-        res.json({ success: true, count: farmers.length, data: farmers });
+        if (mongoose.connection.readyState !== 1) return sendResponse(res, 503, false, null, null, 'Database offline');
+        const farmers = await FarmerRepository.findAll();
+        return sendResponse(res, 200, true, 'Profiles retrieved successfully.', farmers, null, { count: farmers.length });
     } catch (err) {
         logError('GET /profile failed', err);
-        res.status(500).json({ success: false, error: err.message });
+        return sendResponse(res, 500, false, null, null, 'Internal Server Error', err.message);
     }
 });
 
 /** GET /api/profile/:id - Get a single farmer by ID */
 router.get('/profile/:id', async (req, res) => {
     try {
-        if (mongoose.connection.readyState !== 1) return res.status(503).json({ success: false, error: 'Database offline' });
+        if (mongoose.connection.readyState !== 1) return sendResponse(res, 503, false, null, null, 'Database offline');
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-            return res.status(400).json({ success: false, error: 'Invalid farmer id' });
+            return sendResponse(res, 400, false, null, null, 'Invalid farmer id');
         }
-        const farmer = await Farmer.findById(req.params.id);
+        const farmer = await FarmerRepository.findById(req.params.id);
         if (!farmer) {
-            return res.status(404).json({ success: false, error: 'Farmer not found' });
+            return sendResponse(res, 404, false, null, null, 'Farmer not found');
         }
-        res.json({ success: true, data: farmer });
+        return sendResponse(res, 200, true, 'Profile retrieved successfully.', farmer);
     } catch (err) {
         logError('GET /profile/:id failed', err);
-        res.status(500).json({ success: false, error: err.message });
+        return sendResponse(res, 500, false, null, null, 'Internal Server Error', err.message);
     }
 });
 
 /** PUT /api/profile/:id - Update a farmer profile */
 router.put('/profile/:id', async (req, res) => {
     try {
-        if (mongoose.connection.readyState !== 1) return res.status(503).json({ success: false, error: 'Database offline' });
+        if (mongoose.connection.readyState !== 1) return sendResponse(res, 503, false, null, null, 'Database offline');
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-            return res.status(400).json({ success: false, error: 'Invalid farmer id' });
+            return sendResponse(res, 400, false, null, null, 'Invalid farmer id');
         }
         const errors = validateProfileInput(req.body, { partial: true });
         if (errors.length > 0) {
-            return res.status(400).json({
-                success: false,
-                error: 'Validation failed',
-                details: errors
-            });
+            return sendResponse(res, 400, false, null, null, 'Validation failed', errors);
         }
 
         const updates = buildProfilePayload(req.body, { isUpdate: true });
         delete updates.createdAt;
         delete updates._id;
 
-        const updatedFarmer = await Farmer.findByIdAndUpdate(
-            req.params.id,
-            { $set: updates },
-            { new: true, runValidators: true }
-        );
+        const updatedFarmer = await FarmerRepository.update(req.params.id, updates);
 
         if (!updatedFarmer) {
-            return res.status(404).json({ success: false, error: 'Farmer not found' });
+            return sendResponse(res, 404, false, null, null, 'Farmer not found');
         }
 
-        res.json({
-            success: true,
-            message: 'Profile updated successfully.',
-            data: updatedFarmer
-        });
+        return sendResponse(res, 200, true, 'Profile updated successfully.', updatedFarmer);
     } catch (err) {
         if (err.code === 11000) {
             const field = Object.keys(err.keyValue)[0];
-            return res.status(409).json({ success: false, error: `A profile with this ${field} already exists.` });
+            return sendResponse(res, 409, false, null, null, `A profile with this ${field} already exists.`);
         }
         logError('PUT /profile/:id failed', err);
-        res.status(500).json({ success: false, error: err.message });
+        return sendResponse(res, 500, false, null, null, 'Internal Server Error', err.message);
     }
 });
 
 /** DELETE /api/profile/:id - Delete a farmer profile */
 router.delete('/profile/:id', async (req, res) => {
     try {
-        if (mongoose.connection.readyState !== 1) return res.status(503).json({ success: false, error: 'Database offline' });
+        if (mongoose.connection.readyState !== 1) return sendResponse(res, 503, false, null, null, 'Database offline');
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-            return res.status(400).json({ success: false, error: 'Invalid farmer id' });
+            return sendResponse(res, 400, false, null, null, 'Invalid farmer id');
         }
         // TODO: Access Control / Authorization should go here before deletion
-        const deletedFarmer = await Farmer.findByIdAndDelete(req.params.id);
+        const deletedFarmer = await FarmerRepository.delete(req.params.id);
         if (!deletedFarmer) {
-            return res.status(404).json({ success: false, error: 'Farmer not found' });
+            return sendResponse(res, 404, false, null, null, 'Farmer not found');
         }
 
-        res.json({
-            success: true,
-            message: 'Profile deleted successfully.',
-            data: deletedFarmer
-        });
+        return sendResponse(res, 200, true, 'Profile deleted successfully.', deletedFarmer);
     } catch (err) {
         logError('DELETE /profile/:id failed', err);
-        res.status(500).json({ success: false, error: err.message });
+        return sendResponse(res, 500, false, null, null, 'Internal Server Error', err.message);
     }
 });
 

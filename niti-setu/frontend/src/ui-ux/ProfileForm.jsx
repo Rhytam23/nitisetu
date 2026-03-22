@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Mic, MicOff, Send, Loader2, Volume2, Target } from 'lucide-react';
 
-const ProfileForm = ({ onProfileSubmit }) => {
+const ProfileForm = ({ onProfileSubmit, selectedLanguage }) => {
   const [profile, setProfile] = useState({
     name: '',
     state: '',
@@ -21,10 +21,28 @@ const ProfileForm = ({ onProfileSubmit }) => {
 
   useEffect(() => {
     if (SpeechRecognition) {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+
       const recognition = new SpeechRecognition();
       recognition.continuous = true;
       recognition.interimResults = true;
-      recognition.lang = 'en-IN'; // Can be expanded for Hindi 'hi-IN'
+      
+      // Map short codes to full BCP-47 tags
+      const langMap = {
+        'en': 'en-IN',
+        'hi': 'hi-IN',
+        'bn': 'bn-IN',
+        'te': 'te-IN',
+        'mr': 'mr-IN',
+        'ta': 'ta-IN',
+        'gu': 'gu-IN',
+        'kn': 'kn-IN',
+        'ml': 'ml-IN',
+        'pa': 'pa-IN'
+      };
+      recognition.lang = langMap[selectedLanguage] || 'en-IN';
 
       recognition.onresult = (event) => {
         let currentTranscript = '';
@@ -42,7 +60,7 @@ const ProfileForm = ({ onProfileSubmit }) => {
 
       recognitionRef.current = recognition;
     }
-  }, [SpeechRecognition]);
+  }, [SpeechRecognition, selectedLanguage]);
 
   const toggleListening = () => {
     if (isListening) {

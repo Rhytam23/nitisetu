@@ -16,20 +16,21 @@ const languages = [
   { code: 'pa', label: 'Punjabi (ਪੰਜਾਬੀ)' }
 ];
 
-const LanguageSelector = () => {
+const LanguageSelector = ({ onLanguageChange }) => {
   const [currentLang, setCurrentLang] = useState('en');
 
   useEffect(() => {
     // Read the current language from the googtrans cookie to persist state across reloads
     const match = document.cookie.match(/googtrans=\/en\/([a-z-]{2,5})/i);
-    if (match && match[1]) {
-      setCurrentLang(match[1]);
-    }
+    const initialLang = (match && match[1]) ? match[1] : 'en';
+    setCurrentLang(initialLang);
+    if (onLanguageChange) onLanguageChange(initialLang);
   }, []);
 
   const handleLanguageChange = (e) => {
     const selectedLang = e.target.value;
     setCurrentLang(selectedLang);
+    if (onLanguageChange) onLanguageChange(selectedLang);
     
     // Programmatically trigger the hidden Google Translate dropdown
     // This translates the page instantly IN PLACE without needing a reload or loading screen!

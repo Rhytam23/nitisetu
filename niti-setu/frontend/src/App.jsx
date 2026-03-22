@@ -12,12 +12,16 @@ function App() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [currentScheme, setCurrentScheme] = useState('');
+  const [selectedLanguage, setSelectedLanguage] = useState('en');
 
   const handleProfileSubmit = async (profileData) => {
     setLoading(true);
     setError(null);
     setResult(null);
     setCurrentScheme(profileData.scheme);
+    
+    // Supplement profile with current language
+    const payload = { ...profileData, preferred_language: selectedLanguage };
 
     try {
       const apiUrl = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api/check` : 'http://localhost:5000/api/check';
@@ -26,7 +30,7 @@ function App() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(profileData),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
@@ -76,7 +80,7 @@ function App() {
             </div>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
-            <LanguageSelector />
+            <LanguageSelector onLanguageChange={setSelectedLanguage} />
             <div className="hidden sm:flex bg-white/5 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 text-[10px] font-black tracking-widest uppercase items-center gap-2 text-brand-400 shadow-[0_0_15px_rgba(0,0,0,0.5)]">
               <span className="w-2 h-2 rounded-full bg-brand-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
               AI Consultant Active
@@ -98,7 +102,7 @@ function App() {
             </p>
           </div>
           
-          <ProfileForm onProfileSubmit={handleProfileSubmit} />
+          <ProfileForm onProfileSubmit={handleProfileSubmit} selectedLanguage={selectedLanguage} />
         </section>
 
         {/* Loading State */}
@@ -127,7 +131,7 @@ function App() {
               <div className="text-center mb-6 sm:mb-8">
                 <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest mb-3 sm:mb-4 inline-block shadow-[0_0_15px_rgba(16,185,129,0.15)]">Step 2: AI Verdict</span>
              </div>
-             <ProofCard result={result} schemeName={currentScheme} />
+             <ProofCard result={result} schemeName={currentScheme} selectedLanguage={selectedLanguage} />
            </section>
         )}
       </main>

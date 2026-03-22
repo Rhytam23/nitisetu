@@ -16,13 +16,36 @@ const ProofCard = ({ result, schemeName }) => {
       return;
     }
 
-    const textToSpeak = `Regarding the ${schemeName} scheme. ${result.status}. ${result.reasoning}. Please review the required documents section for next steps.`;
+    const textToSpeak = `${result.status}. ${result.reasoning}.`;
     const utterance = new SpeechSynthesisUtterance(textToSpeak);
     
     // Set a good voice if available
     const voices = synthRef.current.getVoices();
-    const indianEnglish = voices.find(v => v.lang === 'en-IN');
-    if (indianEnglish) utterance.voice = indianEnglish;
+    
+    // Attempt to find a voice matching the selected language
+    const langVoiceMap = {
+      'en': 'en-IN',
+      'hi': 'hi-IN',
+      'mr': 'mr-IN',
+      'ta': 'ta-IN',
+      'te': 'te-IN',
+      'bn': 'bn-IN',
+      'gu': 'gu-IN',
+      'kn': 'kn-IN',
+      'ml': 'ml-IN',
+      'pa': 'pa-IN'
+    };
+    
+    const targetLang = langVoiceMap[selectedLanguage] || 'en-IN';
+    const localizedVoice = voices.find(v => v.lang.startsWith(targetLang) || v.lang.includes(selectedLanguage));
+    
+    if (localizedVoice) {
+      utterance.voice = localizedVoice;
+    } else {
+      // Fallback to first available voice for that language if any
+      const fallbackVoice = voices.find(v => v.lang.includes(selectedLanguage));
+      if (fallbackVoice) utterance.voice = fallbackVoice;
+    }
     
     utterance.onend = () => setIsPlaying(false);
     
