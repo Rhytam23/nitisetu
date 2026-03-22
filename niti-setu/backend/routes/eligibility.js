@@ -76,11 +76,16 @@ function buildProfilePayload(profile, { isUpdate = false } = {}) {
     if (Object.prototype.hasOwnProperty.call(profile, 'age')) {
         normalized.age = profile.age === null || profile.age === '' ? null : parseInt(profile.age, 10);
     }
-    if (Object.prototype.hasOwnProperty.call(profile, 'phone')) {
-        normalized.phone = String(profile.phone || '').replace(/\D/g, '');
+    if (profile.phone && String(profile.phone).trim() !== '') {
+        normalized.phone = String(profile.phone).replace(/\D/g, '');
+    } else {
+        delete normalized.phone;
     }
-    if (Object.prototype.hasOwnProperty.call(profile, 'aadhaar')) {
-        normalized.aadhaar = String(profile.aadhaar || '').replace(/\D/g, '');
+    
+    if (profile.aadhaar && String(profile.aadhaar).trim() !== '') {
+        normalized.aadhaar = String(profile.aadhaar).replace(/\D/g, '');
+    } else {
+        delete normalized.aadhaar;
     }
 
     if (isUpdate) {
@@ -141,15 +146,15 @@ Your goal is to evaluate if a farmer is eligible for a specific scheme based ONL
 
 ### Analysis Instructions:
 1. **Critical Review**: Match the farmer's profile (State, Landholding, Crop, Category) against the specific eligibility and exclusion criteria in the guidelines.
-2. **Strict Evidence**: You MUST identify the exact page or section that supports your decision.
+2. **Strict Evidence**: You MUST extract a direct, verbatim quote from the provided text that supports your decision. Do NOT fabricate page numbers or sections if they are not explicitly visible in the text.
 3. **Drafting the Reasoning**: Write a clear, encouraging, but firm explanation. 
 
 ### Mandatory JSON Output Format:
 {{
     "status": "Eligible" | "Not Eligible" | "Pending Review",
     "reasoning": "A concise 2-sentence explanation for the farmer.",
-    "document_proof": "The direct quote from the guidelines used to make this decision.",
-    "citation": "Official Document Name, Page X, Section Y",
+    "document_proof": "The EXACT, VERBATIM quote from the provided context supporting this decision.",
+    "citation": "Name of the Source Document",
     "required_documents": ["Document A", "Document B", ...] 
 }}
 
@@ -178,30 +183,37 @@ router.post('/check', async (req, res) => {
         // 2. Wrap ALL AI/DB logic in its own try/catch to ensure fallback
         try {
             // Check for obvious blockers before even trying AI
-            if (!process.env.MONGODB_URI || !process.env.GOOGLE_API_KEY || process.env.MONGODB_URI.includes('mysandbox')) {
+            if (!process.env.MONGODB_URI || !process.env.GOOGLE_API_KEY) {
                 throw new Error("Configuration incomplete or invalid. Skipping AI Engine.");
             }
 
             const store = await getVectorStore();
             
-            // This constructor is known to throw TypeError if config is subtlely wrong
             const llm = new ChatGoogleGenerativeAI({
                 modelName: "gemini-1.5-pro", 
                 apiKey: process.env.GOOGLE_API_KEY,
                 temperature: 0, 
             });
 
+            // 1. Manually retrieve the documents from MongoDB
             const retriever = store.asRetriever({ k: 4 });
-            const prompt = PromptTemplate.fromTemplate(ELIGIBILITY_SYSTEM_PROMPT);
-            const documentChain = await createStuffDocumentsChain({ llm, prompt });
-            const retrievalChain = await createRetrievalChain({
-                combineDocsChain: documentChain,
-                retriever: retriever,
-            });
+            const docs = await retriever.invoke(profileText);
+            
+            // 2. Format the context so the AI actually sees the Source Document names!
+            const formattedContext = docs.map(d => `--- SOURCE DOCUMENT: ${d.metadata.scheme_name || d.metadata.source || 'Unknown'} ---\n${d.pageContent}`).join('\n\n');
 
-            const response = await retrievalChain.invoke({ input: profileText });
-            let rawAnswer = response.answer;
-            rawAnswer = rawAnswer.replace(/```json/g, '').replace(/```/g, '').trim();
+            // 3. Format the prompt and invoke the LLM safely
+            const promptTemplate = PromptTemplate.fromTemplate(ELIGIBILITY_SYSTEM_PROMPT);
+            const finalPrompt = await promptTemplate.format({ context: formattedContext, input: profileText });
+            
+            const response = await llm.invoke(finalPrompt);
+            
+            // `response.content` is the string returned by Chat model
+            let rawAnswer = response?.content || "";
+            if (!rawAnswer) {
+                throw new Error("AI returned an empty or undefined response.");
+            }
+            rawAnswer = String(rawAnswer).replace(/```json/gi, '').replace(/```/g, '').trim();
             jsonResult = JSON.parse(rawAnswer);
             console.log("AI Engine success.");
         } catch (ragError) {
@@ -218,28 +230,26 @@ router.post('/check', async (req, res) => {
             let docs = ["Aadhaar Card", "Land Record (Jamabandi)", "Bank Passbook"];
 
             if (scheme === "PM-KISAN") {
-                isEligible = acres <= 5; // 2 Hectares limit
-                status = isEligible ? "Eligible" : "Not Eligible";
-                reasoning = isEligible 
-                    ? `As an SMF with ${acres} acres, you qualify for the Rs. 6,000/year benefit under PM-KISAN.`
-                    : `Your land holding of ${acres} acres exceeds the 2-hectare (approx 5 acres) limit for SMF categorization.`;
-                proof = "Clause 3: 'A landholder farmer's family is defined as a family... who owns cultivable land up to 2 hectares'.";
-                cite = "PM-KISAN Operational Guidelines, Page 2, Section 3";
+                isEligible = true; // Limits revised to include all landholders subject to exclusion criteria
+                status = "Eligible";
+                reasoning = `Based on current guidelines, all landholding farmers are eligible for PM-KISAN benefits, subject to specific exclusion criteria (like paying income tax).`;
+                proof = "\"With a view to provide income support to all landholding farmers’ families in the country, having cultivable land, the Central Government has implemented a Central Sector Scheme, namely, 'Pradhan Mantri Kisan Samman Nidhi (PM-KISAN)'\"";
+                cite = "PM-KISAN OPERATIONAL GUIDELINES";
             } else if (scheme === "PM-KMY") {
                 const isAgeEligible = age >= 18 && age <= 40;
-                isEligible = acres <= 5 && isAgeEligible;
+                isEligible = acres <= 5 && isAgeEligible; // 2 Hectares = ~5 acres
                 status = isEligible ? "Eligible" : "Not Eligible";
                 reasoning = isEligible 
                     ? `You are eligible for an assured monthly pension of Rs. 3,000 after age 60.`
                     : !isAgeEligible ? `Age ${age} is outside the 18-40 entry group limit.` : `Land holding exceeds 2 hectares.`;
-                proof = "Clause 4: 'All SMFs... who are of the age of 18 years and above and upto 40 years... are eligible'.";
-                cite = "PM-KMY Operational Guidelines, Page 3, Section 4";
+                proof = "\"All Small and Marginal Farmers (SMFs) in all States and Union Territories of the country, who are of the age of 18 years and above and upto the age of 40 years... are eligible\"";
+                cite = "PM-KMY OPERATIONAL GUIDELINES";
             } else if (scheme === "PM-KUSUM") {
-                isEligible = true; // Most farmers are eligible for solar pump support
+                isEligible = true;
                 status = "Eligible";
-                reasoning = `You qualify for up to 60% combined subsidy (30% Central + 30% State) for solar pump installation.`;
-                proof = "Component B, Clause 5.2.2: 'Central Government will provide financial assistance of 30%... State Government will provide a subsidy of atleast 30%'.";
-                cite = "PM-KUSUM Guidelines, Page 7, Section 5.2.2";
+                reasoning = `You qualify for up to 60% combined subsidy (30% Central + 30% State) for a standalone solar pump installation.`;
+                proof = "\"The Central Government will provide financial assistance of 30%... The State Government will provide a subsidy of atleast 30%; and the remaining up to 40% is to be provided by bank loan/farmer.\"";
+                cite = "PM-KUSUM Guidelines";
                 docs.push("Copy of Electricity Bill (if applicable)", "Solar Pump Preference Form");
             }
 
@@ -274,6 +284,9 @@ router.post('/check', async (req, res) => {
 /** POST /api/profile - Create a new farmer profile */
 router.post('/profile', async (req, res) => {
     try {
+        if (mongoose.connection.readyState !== 1) {
+            return res.status(503).json({ success: false, error: 'Database is offline. Profile saving unavailable.' });
+        }
         const profile = req.body;
 
         const errors = validateProfileInput(profile);
@@ -294,6 +307,10 @@ router.post('/profile', async (req, res) => {
             data: createdFarmer
         });
     } catch (err) {
+        if (err.code === 11000) {
+            const field = Object.keys(err.keyValue)[0];
+            return res.status(409).json({ success: false, error: `A profile with this ${field} already exists.` });
+        }
         logError('POST /profile failed', err);
         res.status(500).json({ success: false, error: err.message });
     }
@@ -302,6 +319,7 @@ router.post('/profile', async (req, res) => {
 /** GET /api/profile - List all farmer profiles */
 router.get('/profile', async (req, res) => {
     try {
+        if (mongoose.connection.readyState !== 1) return res.status(503).json({ success: false, error: 'Database offline' });
         const farmers = await Farmer.find().sort({ createdAt: -1 });
         res.json({ success: true, count: farmers.length, data: farmers });
     } catch (err) {
@@ -313,6 +331,7 @@ router.get('/profile', async (req, res) => {
 /** GET /api/profile/:id - Get a single farmer by ID */
 router.get('/profile/:id', async (req, res) => {
     try {
+        if (mongoose.connection.readyState !== 1) return res.status(503).json({ success: false, error: 'Database offline' });
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
             return res.status(400).json({ success: false, error: 'Invalid farmer id' });
         }
@@ -330,6 +349,7 @@ router.get('/profile/:id', async (req, res) => {
 /** PUT /api/profile/:id - Update a farmer profile */
 router.put('/profile/:id', async (req, res) => {
     try {
+        if (mongoose.connection.readyState !== 1) return res.status(503).json({ success: false, error: 'Database offline' });
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
             return res.status(400).json({ success: false, error: 'Invalid farmer id' });
         }
@@ -362,6 +382,10 @@ router.put('/profile/:id', async (req, res) => {
             data: updatedFarmer
         });
     } catch (err) {
+        if (err.code === 11000) {
+            const field = Object.keys(err.keyValue)[0];
+            return res.status(409).json({ success: false, error: `A profile with this ${field} already exists.` });
+        }
         logError('PUT /profile/:id failed', err);
         res.status(500).json({ success: false, error: err.message });
     }
@@ -370,9 +394,11 @@ router.put('/profile/:id', async (req, res) => {
 /** DELETE /api/profile/:id - Delete a farmer profile */
 router.delete('/profile/:id', async (req, res) => {
     try {
+        if (mongoose.connection.readyState !== 1) return res.status(503).json({ success: false, error: 'Database offline' });
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
             return res.status(400).json({ success: false, error: 'Invalid farmer id' });
         }
+        // TODO: Access Control / Authorization should go here before deletion
         const deletedFarmer = await Farmer.findByIdAndDelete(req.params.id);
         if (!deletedFarmer) {
             return res.status(404).json({ success: false, error: 'Farmer not found' });

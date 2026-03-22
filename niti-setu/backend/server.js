@@ -32,7 +32,10 @@ const startServer = async () => {
     console.warn('WARNING: MONGODB_URI not set in .env. Skipping database connection.');
   } else {
     try {
-      await mongoose.connect(process.env.MONGODB_URI);
+      mongoose.set('bufferCommands', false); // Prevent API endpoints from hanging when DB is down
+      await mongoose.connect(process.env.MONGODB_URI, {
+          serverSelectionTimeoutMS: 5000 // Timeout fast if IP is blocked
+      });
       console.log('Connected to MongoDB');
     } catch (error) {
       console.error('WARNING: Failed to connect to MongoDB initially. Server will still start, but database-dependent features may fail:', error.message);

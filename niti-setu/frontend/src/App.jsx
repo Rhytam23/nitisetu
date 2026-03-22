@@ -20,7 +20,8 @@ function App() {
     setCurrentScheme(profileData.scheme);
 
     try {
-      const response = await fetch('https://nitisetu-production.up.railway.app/api/check', {
+      const apiUrl = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api/check` : 'http://localhost:5000/api/check';
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
