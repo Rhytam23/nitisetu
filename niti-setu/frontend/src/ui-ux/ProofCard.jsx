@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { CheckCircle, XCircle, FileText, Bookmark, Volume2, SquarePlay } from 'lucide-react';
 
-const ProofCard = ({ result, schemeName }) => {
+const ProofCard = ({ result, schemeName, selectedLanguage }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const synthRef = useRef(window.speechSynthesis);
 

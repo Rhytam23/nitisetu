@@ -182,7 +182,7 @@ router.post('/check', async (req, res) => {
 
     try {
         // 1. Defensively construct profile text
-        const { state, land_acres, crop, scheme, phone, preferred_language = 'en' } = req.body;
+        const { state, district, aadhaar, land_acres, crop, scheme, phone, age, preferred_language = 'en' } = req.body;
         
         // Map common codes to full names for the AI prompt
         const langNames = {
@@ -194,9 +194,10 @@ router.post('/check', async (req, res) => {
         };
         const targetLanguage = langNames[preferred_language] || 'English'; // Default to English if code not found
 
-        const farmerProfile = { state, land_acres, crop, scheme, phone };
+        const farmerProfile = { state, district, aadhaar, land_acres, crop, scheme, phone, age };
         
-        let profileText = `Farmer from ${farmerProfile.state || 'Unknown'}, Landholding: ${parseFloat(farmerProfile.land_acres) || 0} acres, Crop: ${farmerProfile.crop || 'Unknown'}. Checking: ${farmerProfile.scheme || 'General'}`;
+        let profileText = `Farmer from ${farmerProfile.state || 'Unknown'} (District: ${farmerProfile.district || 'Unknown'}), Landholding: ${parseFloat(farmerProfile.land_acres) || 0} acres, Crop: ${farmerProfile.crop || 'Unknown'}. Checking: ${farmerProfile.scheme || 'General'}`;
+        if (farmerProfile.aadhaar) profileText += ` | Aadhaar provided: Yes.`;
         console.log("Analyzing Profile:", profileText);
 
         // 2. Wrap ALL AI/DB logic in its own try/catch to ensure fallback
@@ -242,6 +243,22 @@ router.post('/check', async (req, res) => {
         } catch (ragError) {
             console.warn("Niti-Setu Fallback Triggered:", ragError.message);
             usedMock = true;
+
+            // Localized fallback strings for high-impact languages
+            const localizedFallbacks = {
+                'Hindi': {
+                    'Eligible': 'पात्र',
+                    'Not Eligible': 'अपात्र',
+                    'PM-KISAN': 'वर्तमान दिशा-निर्देशों के आधार पर, सभी भूमिधारक किसान PM-KISAN लाभों के लिए पात्र हैं, जो विशिष्ट अपवर्जन मानदंडों (जैसे आयकर भुगतान) के अधीन हैं।',
+                    'PM-KMY': 'आप वृद्धावस्था के बाद 3,000 रुपये की सुनिश्चित मासिक पेंशन के लिए पात्र हैं।',
+                    'PM-KMY_AgeErr': `आयु ${req.body.age || 30} वर्ष 18-40 वर्ष की प्रवेश समूह सीमा से बाहर है।`,
+                    'PM-KMY_LandErr': 'भूमि जोत 2 हेक्टेयर से अधिक है।',
+                    'PM-KUSUM': 'आप स्टैंडअलोन सौर पंप स्थापना के लिए 60% तक संयुक्त सब्सिडी (30% केंद्र + 30% राज्य) के लिए पात्र हैं।'
+                }
+            };
+            
+            const isHindi = targetLanguage === 'Hindi';
+            const fallbacks = localizedFallbacks[targetLanguage] || {};
             
             const acres = parseFloat(farmerProfile.land_acres) || 0;
             const age = parseInt(farmerProfile.age) || 30; // Default to eligible age if not provided
@@ -253,24 +270,26 @@ router.post('/check', async (req, res) => {
             let docs = ["Aadhaar Card", "Land Record (Jamabandi)", "Bank Passbook"];
 
             if (scheme === "PM-KISAN") {
-                isEligible = true; // Limits revised to include all landholders subject to exclusion criteria
-                status = "Eligible";
-                reasoning = `Based on current guidelines, all landholding farmers are eligible for PM-KISAN benefits, subject to specific exclusion criteria (like paying income tax).`;
+                isEligible = true;
+                status = isHindi ? fallbacks['Eligible'] : "Eligible";
+                reasoning = isHindi ? fallbacks['PM-KISAN'] : `Based on current guidelines, all landholding farmers are eligible for PM-KISAN benefits, subject to specific exclusion criteria (like paying income tax).`;
                 proof = "\"With a view to provide income support to all landholding farmers’ families in the country, having cultivable land, the Central Government has implemented a Central Sector Scheme, namely, 'Pradhan Mantri Kisan Samman Nidhi (PM-KISAN)'\"";
                 cite = "PM-KISAN OPERATIONAL GUIDELINES";
             } else if (scheme === "PM-KMY") {
                 const isAgeEligible = age >= 18 && age <= 40;
-                isEligible = acres <= 5 && isAgeEligible; // 2 Hectares = ~5 acres
-                status = isEligible ? "Eligible" : "Not Eligible";
+                isEligible = acres <= 5 && isAgeEligible;
+                status = isEligible ? (isHindi ? fallbacks['Eligible'] : "Eligible") : (isHindi ? fallbacks['Not Eligible'] : "Not Eligible");
                 reasoning = isEligible 
-                    ? `You are eligible for an assured monthly pension of Rs. 3,000 after age 60.`
-                    : !isAgeEligible ? `Age ${age} is outside the 18-40 entry group limit.` : `Land holding exceeds 2 hectares.`;
+                    ? (isHindi ? fallbacks['PM-KMY'] : `You are eligible for an assured monthly pension of Rs. 3,000 after age 60.`)
+                    : !isAgeEligible 
+                        ? (isHindi ? fallbacks['PM-KMY_AgeErr'] : `Age ${age} is outside the 18-40 entry group limit.`) 
+                        : (isHindi ? fallbacks['PM-KMY_LandErr'] : `Land holding exceeds 2 hectares.`);
                 proof = "\"All Small and Marginal Farmers (SMFs) in all States and Union Territories of the country, who are of the age of 18 years and above and upto the age of 40 years... are eligible\"";
                 cite = "PM-KMY OPERATIONAL GUIDELINES";
             } else if (scheme === "PM-KUSUM") {
                 isEligible = true;
-                status = "Eligible";
-                reasoning = `You qualify for up to 60% combined subsidy (30% Central + 30% State) for a standalone solar pump installation.`;
+                status = isHindi ? fallbacks['Eligible'] : "Eligible";
+                reasoning = isHindi ? fallbacks['PM-KUSUM'] : `You qualify for up to 60% combined subsidy (30% Central + 30% State) for a standalone solar pump installation.`;
                 proof = "\"The Central Government will provide financial assistance of 30%... The State Government will provide a subsidy of atleast 30%; and the remaining up to 40% is to be provided by bank loan/farmer.\"";
                 cite = "PM-KUSUM Guidelines";
                 docs.push("Copy of Electricity Bill (if applicable)", "Solar Pump Preference Form");

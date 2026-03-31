@@ -1,11 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
 import { Mic, MicOff, Send, Loader2, Volume2, Target } from 'lucide-react';
 
+// Try to grab standard SpeechRecognition interface
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
 const ProfileForm = ({ onProfileSubmit, selectedLanguage }) => {
   const [profile, setProfile] = useState({
     name: '',
     state: '',
     district: '',
+    aadhaar: '',
     land_acres: '',
     crop: '',
     social_category: 'General',
@@ -14,9 +18,6 @@ const ProfileForm = ({ onProfileSubmit, selectedLanguage }) => {
 
   const [isListening, setIsListening] = useState(false);
   const [voiceText, setVoiceText] = useState('');
-  
-  // Try to grab standard SpeechRecognition interface
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   const recognitionRef = useRef(null);
 
   useEffect(() => {
@@ -71,7 +72,7 @@ const ProfileForm = ({ onProfileSubmit, selectedLanguage }) => {
 
       recognitionRef.current = recognition;
     }
-  }, [SpeechRecognition, selectedLanguage]);
+  }, [selectedLanguage]);
 
   const toggleListening = () => {
     if (isListening) {
@@ -79,7 +80,6 @@ const ProfileForm = ({ onProfileSubmit, selectedLanguage }) => {
       setIsListening(false);
       
       // Auto-extract entities from voiceText here using simple regex or a small NLP function
-      // For MVP, we simply store it to be passed along, or mock-parse:
       extractEntitiesFromSpeech(voiceText);
       
     } else {
@@ -94,7 +94,7 @@ const ProfileForm = ({ onProfileSubmit, selectedLanguage }) => {
     const lowerText = text.toLowerCase();
     
     // Improved land holding extraction (supports acres, hectares, decimals)
-    const landMatch = text.match(/([\d.]+)\s*(acres?|hectares?|ha|aycre)/i);
+    const landMatch = text.match(/([\d.]+)\s*(acres?|hectares?|ha|acre)/i);
     if (landMatch) {
       let value = parseFloat(landMatch[1]);
       const unit = landMatch[2].toLowerCase();
@@ -103,6 +103,19 @@ const ProfileForm = ({ onProfileSubmit, selectedLanguage }) => {
         value = (value * 2.471).toFixed(2);
       }
       newProfile.land_acres = value.toString();
+    }
+
+    // Aadhaar extraction (12 digits, potentially with spaces)
+    const aadhaarMatch = text.match(/\b\d{4}\s*\d{4}\s*\d{4}\b/);
+    if (aadhaarMatch) {
+      newProfile.aadhaar = aadhaarMatch[0].replace(/\s/g, '');
+    }
+
+    // District extraction (common trigger words)
+    const districtMatch = text.match(/(?:district|dist|place|location|living in)\s*([a-z\s]+)/i);
+    if (districtMatch && districtMatch[1]) {
+      const dist = districtMatch[1].trim().split(' ')[0]; // Take the first word
+      newProfile.district = dist.charAt(0).toUpperCase() + dist.slice(1);
     }
 
     // Improved crop extraction
@@ -189,6 +202,14 @@ const ProfileForm = ({ onProfileSubmit, selectedLanguage }) => {
             />
           </div>
           <div className="group">
+            <label className="block text-[10px] sm:text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">District</label>
+            <input 
+              type="text" name="district" value={profile.district} onChange={handleChange}
+              className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-black/20 backdrop-blur-sm border border-white/10 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all shadow-sm group-hover:bg-white/5 text-white font-medium text-sm sm:text-base placeholder-slate-600"
+              placeholder="e.g. Varanasi"
+            />
+          </div>
+          <div className="group">
             <label className="block text-[10px] sm:text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Land Holding (Acres)</label>
             <input 
               type="number" step="0.1" name="land_acres" value={profile.land_acres} onChange={handleChange}
@@ -202,6 +223,15 @@ const ProfileForm = ({ onProfileSubmit, selectedLanguage }) => {
               type="text" name="crop" value={profile.crop} onChange={handleChange}
               className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-black/20 backdrop-blur-sm border border-white/10 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all shadow-sm group-hover:bg-white/5 text-white font-medium text-sm sm:text-base placeholder-slate-600"
               placeholder="e.g. Wheat, Rice"
+            />
+          </div>
+          <div className="group">
+            <label className="block text-[10px] sm:text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Aadhaar (12 digits)</label>
+            <input 
+              type="text" name="aadhaar" value={profile.aadhaar} onChange={handleChange}
+              className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-black/20 backdrop-blur-sm border border-white/10 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all shadow-sm group-hover:bg-white/5 text-white font-medium text-sm sm:text-base placeholder-slate-600"
+              placeholder="e.g. 123456789012"
+              maxLength="12"
             />
           </div>
           <div className="group">
