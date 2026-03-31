@@ -188,7 +188,9 @@ router.post('/check', async (req, res) => {
         const langNames = {
             'hi': 'Hindi', 'mr': 'Marathi', 'ta': 'Tamil', 'te': 'Telugu',
             'bn': 'Bengali', 'gu': 'Gujarati', 'kn': 'Kannada', 'ml': 'Malayalam',
-            'pa': 'Punjabi', 'en': 'English'
+            'pa': 'Punjabi', 'as': 'Assamese', 'sa': 'Sanskrit', 'mai': 'Maithili',
+            'sat': 'Santali', 'doi': 'Dogri', 'mni': 'Manipuri', 'brx': 'Bodo',
+            'kok': 'Konkani', 'ks': 'Kashmiri', 'ne': 'Nepali', 'sd': 'Sindhi', 'en': 'English'
         };
         const targetLanguage = langNames[preferred_language] || 'English'; // Default to English if code not found
 

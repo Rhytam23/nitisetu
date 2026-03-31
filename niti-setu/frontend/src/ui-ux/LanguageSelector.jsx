@@ -13,7 +13,18 @@ const languages = [
   { code: 'kn', label: 'Kannada (ಕನ್ನಡ)' },
   { code: 'or', label: 'Odia (ଓଡ଼ିଆ)' },
   { code: 'ml', label: 'Malayalam (മലയാളം)' },
-  { code: 'pa', label: 'Punjabi (ਪੰਜਾਬੀ)' }
+  { code: 'pa', label: 'Punjabi (ਪੰਜਾਬੀ)' },
+  { code: 'sa', label: 'Sanskrit (संस्कृतम्)' },
+  { code: 'as', label: 'Assamese (অসমীয়া)' },
+  { code: 'mai', label: 'Maithili (मैथिली)' },
+  { code: 'sat', label: 'Santali (संताली)' },
+  { code: 'doi', label: 'Dogri (डोगरी)' },
+  { code: 'mni', label: 'Manipuri (মৈতৈলোন্)' },
+  { code: 'brx', label: 'Bodo (बड़ो)' },
+  { code: 'kok', label: 'Konkani (कोंकणी)' },
+  { code: 'ks', label: 'Kashmiri (کٲشُر)' },
+  { code: 'ne', label: 'Nepali (नेपाली)' },
+  { code: 'sd', label: 'Sindhi (सिंधी)' }
 ];
 
 const LanguageSelector = ({ onLanguageChange }) => {

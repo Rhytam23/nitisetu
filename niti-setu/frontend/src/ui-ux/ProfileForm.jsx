@@ -40,7 +40,18 @@ const ProfileForm = ({ onProfileSubmit, selectedLanguage }) => {
         'gu': 'gu-IN',
         'kn': 'kn-IN',
         'ml': 'ml-IN',
-        'pa': 'pa-IN'
+        'pa': 'pa-IN',
+        'sa': 'sa-IN',
+        'as': 'as-IN',
+        'mai': 'mai-IN',
+        'sat': 'sat-IN',
+        'doi': 'doi-IN',
+        'mni': 'mni-IN',
+        'brx': 'brx-IN',
+        'kok': 'kok-IN',
+        'ks': 'ks-IN',
+        'ne': 'ne-IN',
+        'sd': 'sd-IN'
       };
       recognition.lang = langMap[selectedLanguage] || 'en-IN';
 
