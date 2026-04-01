@@ -22,7 +22,7 @@ const LoginPage = ({ onLoginSuccess, onBackToLanding }) => {
     setError(null);
 
     const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
-    const apiUrl = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}${endpoint}` : `http://localhost:5000${endpoint}`;
+    const apiUrl = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}${endpoint}` : `http://localhost:5001${endpoint}`;
 
     try {
       const response = await fetch(apiUrl, {
@@ -103,15 +103,16 @@ const LoginPage = ({ onLoginSuccess, onBackToLanding }) => {
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 group-focus-within:text-brand-400 transition-colors">
                   <User size={18} />
                 </div>
-                <input 
-                  type="text" 
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                  className="w-full pl-12 pr-4 py-4 bg-black/20 border border-white/10 rounded-2xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-white font-medium placeholder-slate-600" 
-                  placeholder="Full Name"
-                />
+                  <input 
+                    type="text" 
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                    autoComplete="name"
+                    className="w-full pl-12 pr-4 py-4 bg-black/20 border border-white/10 rounded-2xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-white font-medium placeholder-slate-600" 
+                    placeholder="Full Name"
+                  />
               </div>
             )}
 
@@ -125,6 +126,7 @@ const LoginPage = ({ onLoginSuccess, onBackToLanding }) => {
                 value={formData.email}
                 onChange={handleChange}
                 required
+                autoComplete="email"
                 className="w-full pl-12 pr-4 py-4 bg-black/20 border border-white/10 rounded-2xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-white font-medium placeholder-slate-600" 
                 placeholder="Email Address"
               />
@@ -140,6 +142,7 @@ const LoginPage = ({ onLoginSuccess, onBackToLanding }) => {
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
+                  autoComplete="tel"
                   className="w-full pl-12 pr-4 py-4 bg-black/20 border border-white/10 rounded-2xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-white font-medium placeholder-slate-600" 
                   placeholder="Phone (Optional)"
                 />
@@ -156,6 +159,7 @@ const LoginPage = ({ onLoginSuccess, onBackToLanding }) => {
                 value={formData.password}
                 onChange={handleChange}
                 required
+                autoComplete={isLogin ? "current-password" : "new-password"}
                 className="w-full pl-12 pr-4 py-4 bg-black/20 border border-white/10 rounded-2xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all text-white font-medium placeholder-slate-600" 
                 placeholder="Password"
               />

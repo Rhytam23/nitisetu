@@ -1,4 +1,5 @@
 import express from 'express';
+import mongoose from 'mongoose';
 import User from '../models/User.js';
 
 const router = express.Router();
@@ -11,6 +12,11 @@ const sendResponse = (res, statusCode, success, message, data = null, error = nu
 router.post('/register', async (req, res) => {
     try {
         const { email, password, name, phone } = req.body;
+
+        if (mongoose.connection.readyState !== 1) {
+            console.error('Registration attempt failed: Database is not ready. Current state:', mongoose.connection.readyState);
+            return sendResponse(res, 503, false, 'Database connection is still initializing. Please try again in a few seconds.');
+        }
 
         if (!email || !password || !name) {
             return sendResponse(res, 400, false, 'Missing required fields: email, password, and name are required.');
@@ -37,6 +43,11 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
+
+        if (mongoose.connection.readyState !== 1) {
+            console.error('Login attempt failed: Database is not ready. Current state:', mongoose.connection.readyState);
+            return sendResponse(res, 503, false, 'Database connection is still initializing. Please try again in a few seconds.');
+        }
 
         if (!email || !password) {
             return sendResponse(res, 400, false, 'Email and password are required.');

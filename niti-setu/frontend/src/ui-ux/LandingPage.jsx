@@ -39,28 +39,29 @@ const LandingPage = ({ onGetStarted }) => {
     <div className="min-h-screen bg-[#06080B] text-slate-200 font-sans selection:bg-brand-500/30 selection:text-white relative overflow-x-hidden">
       
       {/* Floating Glass Navigation */}
-      <nav className={`fixed top-0 left-0 w-full z-[100] transition-all duration-500 ${scrolled ? 'py-3' : 'py-6'}`}>
+      <nav className={`fixed top-0 left-0 w-full z-[100] transition-all duration-500 ${scrolled ? 'py-2 sm:py-3' : 'py-4 sm:py-6'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className={`flex items-center justify-between p-2 pl-6 pr-2 rounded-full border transition-all duration-500 ${scrolled ? 'glass-header shadow-2xl border-white/10' : 'bg-transparent border-transparent'}`}>
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center shadow-[0_0_15px_rgba(20,184,166,0.4)]">
-                <Globe className="text-slate-950 w-5 h-5" />
+          <div className={`flex items-center justify-between p-1.5 sm:p-2 pl-4 sm:pl-6 pr-1.5 sm:pr-2 rounded-full border transition-all duration-500 ${scrolled ? 'glass-header shadow-2xl border-white/10' : 'bg-transparent border-transparent'}`}>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-brand-500 flex items-center justify-center shadow-[0_0_15px_rgba(20,184,166,0.4)]">
+                <Globe className="text-slate-950 w-4 h-4 sm:w-5 sm:h-5" />
               </div>
-              <span className="text-xl font-black text-white tracking-tighter">Niti-Setu</span>
+              <span className="text-lg sm:text-xl font-black text-white tracking-tighter">Niti-Setu</span>
             </div>
             
             <div className="hidden md:flex items-center gap-8 px-6">
-              <a href="#features" className="text-xs font-black uppercase tracking-widest text-slate-400 hover:text-brand-400 transition-colors">Features</a>
-              <a href="#schemes" className="text-xs font-black uppercase tracking-widest text-slate-400 hover:text-brand-400 transition-colors">Schemes</a>
-              <a href="#" className="text-xs font-black uppercase tracking-widest text-slate-400 hover:text-brand-400 transition-colors">Documentation</a>
+              <a href="#features" className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-brand-400 transition-colors">Features</a>
+              <a href="#schemes" className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-brand-400 transition-colors">Schemes</a>
+              <a href="#" className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-brand-400 transition-colors">Documentation</a>
             </div>
 
             <button 
               onClick={onGetStarted}
-              className="flex items-center gap-2 px-6 py-2.5 bg-white/10 hover:bg-white text-white hover:text-slate-950 border border-white/10 rounded-full text-xs font-black uppercase tracking-widest transition-all shadow-lg hover:shadow-white/10"
+              className="flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2 sm:py-2.5 bg-white/10 hover:bg-white text-white hover:text-slate-950 border border-white/10 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-lg hover:shadow-white/10"
             >
-              <User size={14} />
-              Citizen Login
+              <User size={12} className="sm:w-[14px] sm:h-[14px]" />
+              <span className="hidden xs:inline">Citizen Login</span>
+              <span className="xs:hidden">Login</span>
             </button>
           </div>
         </div>
@@ -71,30 +72,30 @@ const LandingPage = ({ onGetStarted }) => {
         {/* Background Visual Asset */}
         <div className="absolute inset-0 z-0">
           <img 
-            src="/landing_hero_agri_tech_1775019607501.png" 
+            src="/landing_hero_agri_tech_new.png" 
             alt="Futuristic Agricultural Visualization" 
-            className="w-full h-full object-cover opacity-30 mix-blend-lighten scale-110 animate-pulse"
+            className="w-full h-full object-cover opacity-30 mix-blend-lighten scale-110 animate-pulse relative"
             style={{ animationDuration: '8s' }}
           />
           <div className="absolute inset-0 bg-gradient-to-b from-[#06080B] via-transparent to-[#06080B]"></div>
           <div className="absolute inset-0 bg-gradient-to-r from-[#06080B] via-[#06080B]/20 to-transparent"></div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 w-full">
-          <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-[10px] font-black uppercase tracking-[0.2em] mb-8 animate-fade-in-up">
+        <div className="content-container px-4 sm:px-6 relative z-10 w-full">
+          <div className="max-w-4xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] mb-6 sm:mb-8 animate-fade-in-up">
               <Star className="w-3 h-3 fill-brand-400" />
               Revolutionizing Indian Agricultural Policy
             </div>
             
-            <h1 className="text-6xl sm:text-7xl lg:text-8xl font-black text-white leading-[0.9] tracking-tighter mb-8 animate-reveal" style={{ animationDelay: '0.1s' }}>
+            <h1 className="text-[--text-fluid-hero] font-black text-white leading-[0.9] tracking-tighter mb-6 sm:mb-8 animate-reveal" style={{ animationDelay: '0.1s' }}>
               Clarity is <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 via-emerald-400 to-cyan-500 drop-shadow-[0_0_30px_rgba(20,184,166,0.3)]">
                 The New Bridge.
               </span>
             </h1>
             
-            <p className="text-xl sm:text-2xl text-slate-400 mb-12 leading-relaxed font-medium max-w-xl animate-reveal" style={{ animationDelay: '0.2s' }}>
+            <p className="text-lg sm:text-xl lg:text-2xl text-slate-400 mb-10 sm:mb-12 leading-relaxed font-medium max-w-2xl animate-reveal" style={{ animationDelay: '0.2s' }}>
               The nation's first AI-powered consultant that translates bureaucratic 
               legalese into instant, voice-activated eligibility for every farmer.
             </p>

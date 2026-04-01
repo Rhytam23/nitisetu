@@ -29,25 +29,35 @@ app.use('/api/auth', authRoutes);
 
 // Start Server
 const startServer = async () => {
-  // Try to connect to MongoDB if URI is provided
-  if (!process.env.MONGODB_URI) {
-    console.warn('WARNING: MONGODB_URI not set in .env. Skipping database connection.');
-  } else {
-    try {
-      mongoose.set('bufferCommands', false); // Prevent API endpoints from hanging when DB is down
-      await mongoose.connect(process.env.MONGODB_URI, {
-          serverSelectionTimeoutMS: 5000 // Timeout fast if IP is blocked
-      });
-      console.log('Connected to MongoDB');
-    } catch (error) {
-      console.error('WARNING: Failed to connect to MongoDB initially. Server will still start, but database-dependent features may fail:', error.message);
-    }
-  }
+    // Explicitly enable bufferCommands for safer startup
+    mongoose.set('bufferCommands', true);
 
-  // Always start the server regardless of DB status
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
+    if (process.env.MONGODB_URI) {
+        try {
+            await mongoose.connect(process.env.MONGODB_URI, {
+                serverSelectionTimeoutMS: 5000,
+                connectTimeoutMS: 10000
+            });
+            console.log('Connected to MongoDB successfully');
+            
+            // Only start the server AFTER the connection is ready
+            app.listen(PORT, () => {
+                console.log(`Server running on port ${PORT}`);
+            });
+        } catch (error) {
+            console.error('FATAL: Database connection failed. Server will not start:', error.message);
+            // In a production environment, you might want to stop here.
+            // For now, we still listen so the health check works, but the routes will be blocked.
+            app.listen(PORT, () => {
+                console.log(`Server running in limited mode (DB Offline) on port ${PORT}`);
+            });
+        }
+    } else {
+        console.error('ERROR: MONGODB_URI is not defined in env');
+        app.listen(PORT, () => {
+            console.log(`Server running on port ${PORT} (WITHOUT DATABASE)`);
+        });
+    }
 };
 
 startServer();

@@ -16,6 +16,11 @@
   --color-accent-50: #fefce8;
   --color-accent-500: #eab308;
   --color-accent-600: #ca8a04;
+
+  /* Fluid Typography Scales */
+  --text-fluid-hero: clamp(3rem, 10vw, 8rem);
+  --text-fluid-h2: clamp(2rem, 5vw, 4rem);
+  --text-fluid-body: clamp(0.9rem, 1.25vw, 1.125rem);
 }
 
 @layer base {
@@ -36,6 +41,13 @@
     background: rgba(11, 14, 20, 0.6);
     backdrop-filter: blur(20px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .content-container {
+    max-width: 1440px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
   }
 
   .animate-reveal {

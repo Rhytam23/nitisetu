@@ -26,7 +26,7 @@ function App() {
     const payload = { ...profileData, preferred_language: selectedLanguage };
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api/check` : 'http://localhost:5000/api/check';
+      const apiUrl = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api/check` : 'http://localhost:5001/api/check';
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
@@ -119,7 +119,7 @@ function App() {
         <section className="animate-fade-in-up">
           <div className="text-center mb-8 sm:mb-10">
             <span className="px-3 py-1 bg-brand-500/10 text-brand-400 border border-brand-500/20 rounded-full text-[9px] sm:text-[10px] font-black uppercase tracking-widest mb-3 sm:mb-4 inline-block shadow-[0_0_15px_rgba(16,185,129,0.15)]">Step 1: Application</span>
-            <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight drop-shadow-sm">Check Eligibility</h2>
+            <h2 className="text-[--text-fluid-h2] font-black text-white tracking-tight drop-shadow-sm leading-tight">Farmer Profile</h2>
             <p className="text-slate-400 mt-2 sm:mt-3 max-w-xl mx-auto font-medium text-sm sm:text-base">
               Update your profile details below. Our AI reasoning engine will parse
               the latest government PDF guidelines in real-time.
@@ -133,7 +133,7 @@ function App() {
         {loading && (
           <div className="flex flex-col items-center justify-center p-8 sm:p-16 bg-white/5 backdrop-blur-xl rounded-[2rem] shadow-[0_20px_40px_rgba(0,0,0,0.4)] border border-white/10 animate-pulse text-center">
             <Loader2 className="w-12 h-12 sm:w-16 sm:h-16 text-brand-400 animate-spin mb-4 sm:mb-6 drop-shadow-[0_0_15px_rgba(52,211,153,0.5)]" />
-            <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">Consulting AI Guidelines...</h3>
+            <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">Consulting AI Units...</h3>
             <p className="text-slate-400 mt-2 font-medium tracking-wide text-sm sm:text-base">Retrieving vector embeddings & verifying policy logic</p>
           </div>
         )}

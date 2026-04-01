@@ -195,19 +195,21 @@ const ProfileForm = ({ onProfileSubmit, selectedLanguage }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           <div className="group">
             <label className="block text-[10px] sm:text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">State</label>
-            <input 
-              type="text" name="state" value={profile.state} onChange={handleChange}
-              className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-black/20 backdrop-blur-sm border border-white/10 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all shadow-sm group-hover:bg-white/5 text-white font-medium text-sm sm:text-base placeholder-slate-600"
-              placeholder="e.g. Uttar Pradesh"
-            />
+              <input 
+                type="text" name="state" value={profile.state} onChange={handleChange}
+                autoComplete="address-level1"
+                className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-black/20 backdrop-blur-sm border border-white/10 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all shadow-sm group-hover:bg-white/5 text-white font-medium text-sm sm:text-base placeholder-slate-600"
+                placeholder="e.g. Uttar Pradesh"
+              />
           </div>
           <div className="group">
             <label className="block text-[10px] sm:text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">District</label>
-            <input 
-              type="text" name="district" value={profile.district} onChange={handleChange}
-              className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-black/20 backdrop-blur-sm border border-white/10 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all shadow-sm group-hover:bg-white/5 text-white font-medium text-sm sm:text-base placeholder-slate-600"
-              placeholder="e.g. Varanasi"
-            />
+              <input 
+                type="text" name="district" value={profile.district} onChange={handleChange}
+                autoComplete="address-level2"
+                className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-black/20 backdrop-blur-sm border border-white/10 rounded-lg sm:rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all shadow-sm group-hover:bg-white/5 text-white font-medium text-sm sm:text-base placeholder-slate-600"
+                placeholder="e.g. Varanasi"
+              />
           </div>
           <div className="group">
             <label className="block text-[10px] sm:text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Land Holding (Acres)</label>
