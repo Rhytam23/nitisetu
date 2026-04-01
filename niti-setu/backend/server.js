@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import eligibilityRoutes from './routes/eligibility.js';
+import authRoutes from './routes/auth.js';
 
 process.on('unhandledRejection', (reason, promise) => {
     console.error('Unhandled Rejection at:', promise, 'reason:', reason);
@@ -24,6 +25,7 @@ app.get('/api/health', (req, res) => {
 
 // Niti-Setu Sub-routers
 app.use('/api', eligibilityRoutes);
+app.use('/api/auth', authRoutes);
 
 // Start Server
 const startServer = async () => {

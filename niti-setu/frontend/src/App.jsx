@@ -3,11 +3,13 @@ import { Loader2, ArrowLeft } from 'lucide-react';
 import LandingPage from './ui-ux/LandingPage';
 import ProfileForm from './ui-ux/ProfileForm';
 import ProofCard from './ui-ux/ProofCard';
+import LoginPage from './ui-ux/LoginPage';
 import LanguageSelector from './ui-ux/LanguageSelector';
 import './index.css';
 
 function App() {
-  const [showTool, setShowTool] = useState(false);
+  const [view, setView] = useState('landing'); // 'landing', 'login', 'tool'
+  const [user, setUser] = useState(JSON.parse(localStorage.getItem('niti_user')) || null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
@@ -52,8 +54,23 @@ function App() {
     }
   };
 
-  if (!showTool) {
-    return <LandingPage onGetStarted={() => setShowTool(true)} />;
+  const handleLoginSuccess = () => {
+    setUser(JSON.parse(localStorage.getItem('niti_user')));
+    setView('tool');
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('niti_user');
+    setUser(null);
+    setView('landing');
+  };
+
+  if (view === 'landing') {
+    return <LandingPage onGetStarted={() => setView(user ? 'tool' : 'login')} />;
+  }
+
+  if (view === 'login') {
+    return <LoginPage onLoginSuccess={handleLoginSuccess} onBackToLanding={() => setView('landing')} />;
   }
 
   return (
@@ -69,7 +86,7 @@ function App() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
           <div className="flex items-center gap-3 sm:gap-4">
             <button 
-              onClick={() => setShowTool(false)}
+              onClick={() => setView('landing')}
               className="p-1.5 sm:p-2 hover:bg-white/10 rounded-full transition-colors text-slate-400 hover:text-white"
             >
               <ArrowLeft className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -79,7 +96,13 @@ function App() {
               <p className="text-brand-400 text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] hidden sm:block">Eligibility Engine</p>
             </div>
           </div>
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-3 sm:gap-4">
+            {user && (
+              <div className="hidden md:flex flex-col items-end mr-2">
+                <span className="text-[10px] font-black text-white uppercase tracking-wider">{user.name}</span>
+                <button onClick={handleLogout} className="text-[9px] font-bold text-brand-400 hover:text-brand-300 transition-colors uppercase tracking-widest">Sign Out</button>
+              </div>
+            )}
             <LanguageSelector onLanguageChange={setSelectedLanguage} />
             <div className="hidden sm:flex bg-white/5 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 text-[10px] font-black tracking-widest uppercase items-center gap-2 text-brand-400 shadow-[0_0_15px_rgba(0,0,0,0.5)]">
               <span className="w-2 h-2 rounded-full bg-brand-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
@@ -88,6 +111,7 @@ function App() {
           </div>
         </div>
       </header>
+
 
       {/* Main Content Dashboard */}
       <main className="flex-grow max-w-4xl mx-auto w-full px-4 sm:px-6 py-8 sm:py-12 space-y-8 sm:space-y-12 relative z-10">

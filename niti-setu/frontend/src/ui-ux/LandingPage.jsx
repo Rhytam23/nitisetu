@@ -1,187 +1,228 @@
-import React, { useState } from 'react';
-import { ShieldCheck, Mic, FileSearch, Zap, ArrowRight, ChevronDown, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ShieldCheck, Mic, Zap, ArrowRight, ChevronDown, X, Star, Globe, Cpu, User } from 'lucide-react';
 
 const LandingPage = ({ onGetStarted }) => {
   const [showGuide, setShowGuide] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const features = [
+    {
+      icon: <Mic className="w-6 h-6" />,
+      title: "Voice Intelligence",
+      desc: "Speak naturally in your local dialect. Our AI extracts land and crop data with zero typing required.",
+      color: "from-brand-500 to-brand-600",
+      shadow: "shadow-brand-500/20"
+    },
+    {
+      icon: <ShieldCheck className="w-6 h-6" />,
+      title: "Policy Verification",
+      desc: "Automated cross-referencing against 50+ pages of the latest official PDF guidelines for 100% accuracy.",
+      color: "from-cyan-400 to-blue-500",
+      shadow: "shadow-cyan-400/20"
+    },
+    {
+      icon: <Zap className="w-6 h-6" />,
+      title: "Instant Verdict",
+      desc: "Skip the bureaucratic queues. Receive a definitive 'Yes/No' answer with exact citations in under 3 seconds.",
+      color: "from-purple-500 to-indigo-600",
+      shadow: "shadow-purple-500/20"
+    }
+  ];
 
   return (
-    <div className="min-h-screen bg-[#0B0E14] text-slate-200 font-sans selection:bg-brand-500/30 selection:text-white relative overflow-hidden">
+    <div className="min-h-screen bg-[#06080B] text-slate-200 font-sans selection:bg-brand-500/30 selection:text-white relative overflow-x-hidden">
       
-      {/* Guide Modal Phase */}
-      {showGuide && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-md animate-fade-in">
-          <div className="bg-slate-900/90 backdrop-blur-3xl border border-white/10 p-6 sm:p-10 rounded-[2rem] shadow-[0_30px_60px_rgba(0,0,0,0.8)] max-w-2xl w-full relative">
-            <button onClick={() => setShowGuide(false)} className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-full transition-colors border border-white/5">
-              <X className="w-5 h-5 sm:w-6 sm:h-6" />
-            </button>
-            <h3 className="text-2xl sm:text-3xl font-black text-white mb-6 sm:mb-8 tracking-tight drop-shadow-[0_0_15px_rgba(16,185,129,0.2)]">How Niti-Setu Works</h3>
-            
-            <div className="space-y-6 sm:space-y-8">
-              <div className="flex items-start gap-4 sm:gap-6 group">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-brand-500/10 border border-brand-500/30 text-brand-400 flex items-center justify-center font-black shrink-0 transition-transform group-hover:scale-110 shadow-[0_0_20px_rgba(16,185,129,0.2)]">1</div>
-                <div>
-                  <h4 className="text-lg sm:text-xl font-bold text-white">Voice or Manual Entry</h4>
-                  <p className="text-slate-400 text-sm sm:text-base mt-2 font-medium leading-relaxed">Tap the microphone to speak your land details and crop type, or type them in manually. Our system automatically understands natural agricultural terms.</p>
-                </div>
+      {/* Floating Glass Navigation */}
+      <nav className={`fixed top-0 left-0 w-full z-[100] transition-all duration-500 ${scrolled ? 'py-3' : 'py-6'}`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className={`flex items-center justify-between p-2 pl-6 pr-2 rounded-full border transition-all duration-500 ${scrolled ? 'glass-header shadow-2xl border-white/10' : 'bg-transparent border-transparent'}`}>
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-brand-500 flex items-center justify-center shadow-[0_0_15px_rgba(20,184,166,0.4)]">
+                <Globe className="text-slate-950 w-5 h-5" />
               </div>
-              
-              <div className="flex items-start gap-4 sm:gap-6 group">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 flex items-center justify-center font-black shrink-0 transition-transform group-hover:scale-110 shadow-[0_0_20px_rgba(6,182,212,0.2)]">2</div>
-                <div>
-                  <h4 className="text-lg sm:text-xl font-bold text-white">AI Context Processing</h4>
-                  <p className="text-slate-400 text-sm sm:text-base mt-2 font-medium leading-relaxed">The reasoning engine searches through the latest official PDF guidelines, validating complex eligibility rules instantly against your specific profile.</p>
-                </div>
-              </div>
-              
-              <div className="flex items-start gap-4 sm:gap-6 group">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-400 flex items-center justify-center font-black shrink-0 transition-transform group-hover:scale-110 shadow-[0_0_20px_rgba(168,85,247,0.2)]">3</div>
-                <div>
-                  <h4 className="text-lg sm:text-xl font-bold text-white">Instant Official Verdict</h4>
-                  <p className="text-slate-400 text-sm sm:text-base mt-2 font-medium leading-relaxed">You receive a definitive Yes/No answer, complete with exact citations from the bureaucratic document and a checklist of required proofs to apply.</p>
-                </div>
-              </div>
+              <span className="text-xl font-black text-white tracking-tighter">Niti-Setu</span>
             </div>
             
+            <div className="hidden md:flex items-center gap-8 px-6">
+              <a href="#features" className="text-xs font-black uppercase tracking-widest text-slate-400 hover:text-brand-400 transition-colors">Features</a>
+              <a href="#schemes" className="text-xs font-black uppercase tracking-widest text-slate-400 hover:text-brand-400 transition-colors">Schemes</a>
+              <a href="#" className="text-xs font-black uppercase tracking-widest text-slate-400 hover:text-brand-400 transition-colors">Documentation</a>
+            </div>
+
             <button 
-              onClick={() => { setShowGuide(false); onGetStarted(); }} 
-              className="mt-8 sm:mt-10 w-full py-4 bg-brand-500 hover:bg-brand-400 text-slate-950 font-black rounded-xl shadow-[0_0_30px_rgba(16,185,129,0.3)] hover:shadow-[0_0_50px_rgba(16,185,129,0.5)] hover:-translate-y-1 transition-all text-sm sm:text-base"
+              onClick={onGetStarted}
+              className="flex items-center gap-2 px-6 py-2.5 bg-white/10 hover:bg-white text-white hover:text-slate-950 border border-white/10 rounded-full text-xs font-black uppercase tracking-widest transition-all shadow-lg hover:shadow-white/10"
             >
-              Start Checking Eligibility Now
+              <User size={14} />
+              Citizen Login
             </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* Hero Reveal Section */}
+      <section className="relative min-h-screen flex items-center pt-20 overflow-hidden">
+        {/* Background Visual Asset */}
+        <div className="absolute inset-0 z-0">
+          <img 
+            src="/landing_hero_agri_tech_1775019607501.png" 
+            alt="Futuristic Agricultural Visualization" 
+            className="w-full h-full object-cover opacity-30 mix-blend-lighten scale-110 animate-pulse"
+            style={{ animationDuration: '8s' }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#06080B] via-transparent to-[#06080B]"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-[#06080B] via-[#06080B]/20 to-transparent"></div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 w-full">
+          <div className="max-w-3xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-[10px] font-black uppercase tracking-[0.2em] mb-8 animate-fade-in-up">
+              <Star className="w-3 h-3 fill-brand-400" />
+              Revolutionizing Indian Agricultural Policy
+            </div>
+            
+            <h1 className="text-6xl sm:text-7xl lg:text-8xl font-black text-white leading-[0.9] tracking-tighter mb-8 animate-reveal" style={{ animationDelay: '0.1s' }}>
+              Clarity is <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 via-emerald-400 to-cyan-500 drop-shadow-[0_0_30px_rgba(20,184,166,0.3)]">
+                The New Bridge.
+              </span>
+            </h1>
+            
+            <p className="text-xl sm:text-2xl text-slate-400 mb-12 leading-relaxed font-medium max-w-xl animate-reveal" style={{ animationDelay: '0.2s' }}>
+              The nation's first AI-powered consultant that translates bureaucratic 
+              legalese into instant, voice-activated eligibility for every farmer.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row items-center gap-6 animate-reveal" style={{ animationDelay: '0.3s' }}>
+              <button 
+                onClick={onGetStarted}
+                className="w-full sm:w-auto group px-10 py-5 bg-brand-500 text-slate-950 rounded-full font-black text-lg hover:bg-brand-400 transition-all hover:scale-105 active:scale-95 shadow-[0_0_40px_rgba(20,184,166,0.4)] flex items-center justify-center gap-3"
+              >
+                Start Free Consultation
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </button>
+              <button 
+                onClick={() => setShowGuide(true)} 
+                className="w-full sm:w-auto px-10 py-5 bg-white/5 backdrop-blur-md text-white rounded-full font-bold text-lg border border-white/10 hover:bg-white/10 transition-all flex items-center justify-center gap-3"
+              >
+                <Cpu size={20} className="text-slate-400" />
+                How Engine Works
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 opacity-50 animate-bounce">
+          <span className="text-[10px] font-black uppercase tracking-[0.3em]">Explore Engine Features</span>
+          <ChevronDown size={20} />
+        </div>
+      </section>
+
+      {/* Feature Grid Overhaul */}
+      <section id="features" className="py-32 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-20 animate-fade-in-up">
+            <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-brand-500 mb-4">Precision Engineering</h2>
+            <h3 className="text-4xl sm:text-5xl font-black text-white tracking-tight">Built for Resilience.</h3>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {features.map((f, i) => (
+              <div key={i} className={`glass-card p-10 rounded-[3rem] group hover:bg-white/[0.06] transition-all duration-500 hover:-translate-y-2 animate-reveal`} style={{ animationDelay: `${i * 0.15}s` }}>
+                <div className={`w-16 h-16 bg-gradient-to-br ${f.color} rounded-2xl flex items-center justify-center text-slate-950 mb-8 ${f.shadow} shadow-lg transition-transform group-hover:scale-110 group-hover:rotate-6`}>
+                  {f.icon}
+                </div>
+                <h4 className="text-2xl font-black text-white mb-4">{f.title}</h4>
+                <p className="text-slate-400 font-medium leading-relaxed">{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Global Trust Marquee */}
+      <section id="schemes" className="py-24 border-y border-white/5 bg-white/[0.02]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+           <p className="text-center text-[10px] font-black text-slate-600 uppercase tracking-[0.4em] mb-12">Empowering National Policy Integration</p>
+           <div className="flex flex-wrap justify-center items-center gap-x-16 gap-y-10 opacity-30 hover:opacity-70 transition-opacity duration-700 grayscale hover:grayscale-0">
+             {['PM-KISAN', 'PM-KUSUM', 'PM-KMY', 'FASAL BIMA', 'SOLAR MISSION', 'SOIL HEALTH'].map((s, i) => (
+               <div key={i} className="text-2xl sm:text-3xl font-black text-white tracking-tighter italic">{s}</div>
+             ))}
+           </div>
+        </div>
+      </section>
+
+      {/* Guide Modal Overhaul */}
+      {showGuide && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-3xl animate-fade-in">
+          <div className="bg-[#0D1117] border border-white/10 p-8 sm:p-12 rounded-[3.5rem] shadow-[0_0_100px_rgba(20,184,166,0.15)] max-w-3xl w-full relative overflow-hidden">
+             {/* Modal Background Glow */}
+             <div className="absolute -top-20 -right-20 w-64 h-64 bg-brand-500/10 blur-[80px] rounded-full"></div>
+             
+             <button onClick={() => setShowGuide(false)} className="absolute top-8 right-8 p-3 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-full transition-colors border border-white/5">
+                <X size={24} />
+             </button>
+
+             <h3 className="text-3xl sm:text-4xl font-black text-white mb-10 tracking-tight">The Reasoning Engine</h3>
+             
+             <div className="space-y-10">
+               {[
+                 { step: 1, title: "Contextual Extraction", body: "Our LLM engine parses audio transcripts instantly, mapping regional dialects to structured agricultural metadata.", color: "text-brand-400" },
+                 { step: 2, title: "Policy Vector Search", body: "We cross-verify your profile against thousand-node vector embeddings of official government PDF document caches.", color: "text-cyan-400" },
+                 { step: 3, title: "Official Certification", body: "The system outputs a detailed 'Proof Card', citing identical clauses from government orders for legal clarity.", color: "text-emerald-400" }
+               ].map((item, idx) => (
+                 <div key={idx} className="flex gap-8 group">
+                   <div className={`w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center font-black text-xl shrink-0 transition-all ${item.color} group-hover:scale-110 shadow-lg`}>
+                     {item.step}
+                   </div>
+                   <div>
+                     <h4 className="text-xl font-bold text-white mb-2">{item.title}</h4>
+                     <p className="text-slate-400 font-medium leading-relaxed">{item.body}</p>
+                   </div>
+                 </div>
+               ))}
+             </div>
+             
+             <button 
+               onClick={() => { setShowGuide(false); onGetStarted(); }} 
+               className="mt-12 w-full py-5 bg-brand-500 hover:bg-brand-400 text-slate-950 font-black rounded-2xl shadow-xl transition-all hover:-translate-y-1"
+             >
+               Start Your Consultation
+             </button>
           </div>
         </div>
       )}
 
-      {/* Dark Agri-Tech Orbs */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] bg-brand-500/10 blur-[150px] rounded-full mix-blend-screen"></div>
-        <div className="absolute top-[40%] left-[-10%] w-[30%] h-[30%] bg-cyan-500/10 blur-[120px] rounded-full mix-blend-screen"></div>
-        <div className="absolute bottom-[-10%] right-[20%] w-[35%] h-[35%] bg-purple-500/10 blur-[150px] rounded-full mix-blend-screen"></div>
-      </div>
-
-      {/* Hero Section */}
-      <section className="relative pt-16 sm:pt-20 pb-20 sm:pb-32 lg:pt-32 lg:pb-48 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 backdrop-blur-md border border-white/10 text-brand-400 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] mb-6 sm:mb-8 shadow-sm animate-fade-in-up">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span>
-            </span>
-            Next-Gen Agriculture Tech
-          </div>
-          
-          <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black text-white leading-[1.1] tracking-tight mb-4 sm:mb-6 animate-fade-in-up drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]" style={{ animationDelay: '0.1s' }}>
-            Empowering Farmers with <br className="hidden sm:block" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 via-cyan-400 to-blue-400 drop-shadow-[0_0_30px_rgba(16,185,129,0.3)]">
-              AI-Driven Clarity.
-            </span>
-          </h1>
-          
-          <p className="text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed font-medium animate-fade-in-up px-2" style={{ animationDelay: '0.2s' }}>
-            Niti-Setu translates complex bureaucratic guidelines into instant, 
-            voice-activated eligibility answers for Indian agricultural schemes.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 animate-fade-in-up px-4 sm:px-0" style={{ animationDelay: '0.3s' }}>
-            <button 
-              onClick={onGetStarted}
-              className="w-full sm:w-auto group px-8 sm:px-10 py-4 sm:py-5 bg-gradient-to-r from-brand-500 to-brand-400 text-slate-950 rounded-full font-black text-base sm:text-lg hover:from-brand-400 hover:to-cyan-400 transition-all hover:scale-105 active:scale-95 shadow-[0_0_40px_rgba(16,185,129,0.4)] flex items-center justify-center gap-3 border border-brand-300/50"
-            >
-              Check My Eligibility
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </button>
-            <button 
-              onClick={() => setShowGuide(true)} 
-              className="w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-5 bg-white/5 backdrop-blur-md text-white rounded-full font-bold text-base sm:text-lg border border-white/10 hover:bg-white/10 hover:shadow-[0_0_20px_rgba(255,255,255,0.1)] transition-all"
-            >
-              How it Works
-            </button>
-          </div>
-
-          <div className="mt-16 sm:mt-20 flex flex-col items-center gap-2 text-slate-500 animate-bounce">
-            <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em]">Discover Features</span>
-            <ChevronDown className="w-5 h-5" />
-          </div>
-        </div>
-      </section>
-
-      {/* Features Grid Dark */}
-      <section id="features-section" className="py-16 sm:py-24 relative z-10 scroll-mt-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-            {/* Feature 1 */}
-            <div className="group relative p-6 sm:p-8 rounded-[2.5rem] border border-white/5 bg-white/[0.03] backdrop-blur-2xl hover:bg-white/[0.06] shadow-[0_8px_30px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_40px_rgba(16,185,129,0.1)] hover:-translate-y-1 sm:hover:-translate-y-2 transition-all duration-300">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-brand-500 to-brand-600 rounded-xl sm:rounded-2xl flex items-center justify-center text-slate-950 mb-4 sm:mb-6 shadow-[0_0_20px_rgba(16,185,129,0.4)] group-hover:rotate-6 group-hover:scale-110 transition-transform">
-                <Mic className="w-5 h-5 sm:w-6 sm:h-6" />
-              </div>
-              <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight mb-3 sm:mb-4">Voice-Powered Input</h3>
-              <p className="text-slate-400 leading-relaxed font-medium text-sm sm:text-base">
-                No typing required. Simply speak your details in your language, 
-                and our AI extracts relevant data automatically.
-              </p>
+      {/* High-End CTA Footer */}
+      <footer className="py-24 bg-gradient-to-t from-black to-[#06080B] border-t border-white/5 relative overflow-hidden">
+         <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
+            <div className="flex flex-col items-center text-center">
+               <h2 className="text-4xl sm:text-6xl font-black text-white mb-8 tracking-tighter">Your bridge to a <br />Better Future.</h2>
+               <button 
+                 onClick={onGetStarted}
+                 className="px-12 py-5 bg-white text-slate-950 rounded-full font-black text-xl hover:scale-105 transition-all shadow-[0_0_50px_rgba(255,255,255,0.2)]"
+               >
+                 Get Started Today
+               </button>
             </div>
 
-            {/* Feature 2 */}
-            <div className="group relative p-6 sm:p-8 rounded-[2.5rem] border border-white/5 bg-white/[0.03] backdrop-blur-2xl hover:bg-white/[0.06] shadow-[0_8px_30px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_40px_rgba(6,182,212,0.1)] hover:-translate-y-1 sm:hover:-translate-y-2 transition-all duration-300">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-xl sm:rounded-2xl flex items-center justify-center text-slate-950 mb-4 sm:mb-6 shadow-[0_0_20px_rgba(6,182,212,0.4)] group-hover:-rotate-6 group-hover:scale-110 transition-transform">
-                <ShieldCheck className="w-5 h-5 sm:w-6 sm:h-6" />
-              </div>
-              <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight mb-3 sm:mb-4">Verified Accuracy</h3>
-              <p className="text-slate-400 leading-relaxed font-medium text-sm sm:text-base">
-                Directly cross-references the official 50-page PDF guidelines 
-                to ensure you get 100% reliable information.
-              </p>
+            <div className="mt-24 pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6 opacity-40">
+               <div className="flex items-center gap-2">
+                 <div className="w-5 h-5 rounded bg-white flex items-center justify-center"><Star className="w-3 h-3 fill-slate-950" /></div>
+                 <span className="text-[10px] font-black uppercase tracking-[0.2em]">Niti-Setu Platform</span>
+               </div>
+               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-center">Empowering 100M+ Citizens through Generative Policy Advice</p>
+               <div className="text-[10px] font-black uppercase tracking-[0.2em]">© 2026 Legal-Agri Tech</div>
             </div>
-
-            {/* Feature 3 */}
-            <div className="group relative p-6 sm:p-8 rounded-[2.5rem] border border-white/5 bg-white/[0.03] backdrop-blur-2xl hover:bg-white/[0.06] shadow-[0_8px_30px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_40px_rgba(168,85,247,0.1)] hover:-translate-y-1 sm:hover:-translate-y-2 transition-all duration-300">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-purple-400 to-indigo-500 rounded-xl sm:rounded-2xl flex items-center justify-center text-slate-950 mb-4 sm:mb-6 shadow-[0_0_20px_rgba(168,85,247,0.4)] group-hover:rotate-6 group-hover:scale-110 transition-transform">
-                <Zap className="w-5 h-5 sm:w-6 sm:h-6" />
-              </div>
-              <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight mb-3 sm:mb-4">Instant Analysis</h3>
-              <p className="text-slate-400 leading-relaxed font-medium text-sm sm:text-base">
-                Skip the lines and bureaucratic confusion. Get a "Yes/No" 
-                answer with reasoning in under 3 seconds.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Trust Section */}
-      <section className="py-12 sm:py-20 relative z-10 border-t border-white/5 bg-white/[0.02]">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          <h2 className="text-slate-500 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.3em] mb-6 sm:mb-10">Trusted Analytical Engines For</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
-             <div className="flex flex-col items-center justify-center">
-                <div className="text-lg sm:text-2xl font-black text-white tracking-tight">PM-KISAN</div>
-             </div>
-             <div className="flex flex-col items-center justify-center">
-                <div className="text-lg sm:text-2xl font-black text-white tracking-tight">PM-KUSUM</div>
-             </div>
-             <div className="flex flex-col items-center justify-center">
-                <div className="text-lg sm:text-xl font-black text-white tracking-tight">KMY</div>
-             </div>
-             <div className="flex flex-col items-center justify-center">
-                <div className="text-lg sm:text-xl font-black text-white tracking-tight">FASAL BIMA</div>
-             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section Dark */}
-      <section className="py-16 sm:py-24 bg-gradient-to-br from-brand-900 to-slate-900 text-white relative z-10 overflow-hidden mt-8 sm:mt-10 rounded-t-[2rem] sm:rounded-[3rem] mx-auto max-w-[96%] xl:max-w-7xl shadow-[0_-20px_50px_rgba(16,185,129,0.15)] border border-white/10 border-b-0">
-          <div className="absolute top-0 right-0 w-full sm:w-[60%] h-full bg-gradient-to-l from-brand-500/20 to-transparent blur-3xl"></div>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 text-center">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black mb-6 sm:mb-8 leading-tight tracking-tight drop-shadow-lg">Ready to bridge the gap <br className="hidden sm:block" />between policy and people?</h2>
-            <button 
-              onClick={onGetStarted}
-              className="w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-5 bg-gradient-to-r from-brand-400 to-brand-500 text-slate-950 rounded-full font-black text-lg sm:text-xl hover:scale-105 active:scale-95 shadow-[0_0_40px_rgba(16,185,129,0.5)] transition-all border border-brand-300/50"
-            >
-              Start Consultant Tool
-            </button>
-          </div>
-      </section>
+         </div>
+      </footer>
     </div>
   );
 };
