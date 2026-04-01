@@ -1,20 +1,20 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import LandingPage from './ui-ux/LandingPage';
 import ProfileForm from './ui-ux/ProfileForm';
 import ProofCard from './ui-ux/ProofCard';
-import LoginPage from './ui-ux/LoginPage';
 import LanguageSelector from './ui-ux/LanguageSelector';
 import './index.css';
 
 function App() {
-  const [view, setView] = useState('landing'); // 'landing', 'login', 'tool'
-  const [user, setUser] = useState(JSON.parse(localStorage.getItem('niti_user')) || null);
+  const [view, setView] = useState('landing'); // 'landing', 'tool'
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [currentScheme, setCurrentScheme] = useState('');
   const [selectedLanguage, setSelectedLanguage] = useState('en');
+
+
 
   const handleProfileSubmit = async (profileData) => {
     setLoading(true);
@@ -54,23 +54,12 @@ function App() {
     }
   };
 
-  const handleLoginSuccess = () => {
-    setUser(JSON.parse(localStorage.getItem('niti_user')));
-    setView('tool');
-  };
 
-  const handleLogout = () => {
-    localStorage.removeItem('niti_user');
-    setUser(null);
-    setView('landing');
-  };
+
+
 
   if (view === 'landing') {
-    return <LandingPage onGetStarted={() => setView(user ? 'tool' : 'login')} />;
-  }
-
-  if (view === 'login') {
-    return <LoginPage onLoginSuccess={handleLoginSuccess} onBackToLanding={() => setView('landing')} />;
+    return <LandingPage onGetStarted={() => setView('tool')} />;
   }
 
   return (
@@ -97,12 +86,7 @@ function App() {
             </div>
           </div>
           <div className="flex items-center gap-3 sm:gap-4">
-            {user && (
-              <div className="hidden md:flex flex-col items-end mr-2">
-                <span className="text-[10px] font-black text-white uppercase tracking-wider">{user.name}</span>
-                <button onClick={handleLogout} className="text-[9px] font-bold text-brand-400 hover:text-brand-300 transition-colors uppercase tracking-widest">Sign Out</button>
-              </div>
-            )}
+
             <LanguageSelector onLanguageChange={setSelectedLanguage} />
             <div className="hidden sm:flex bg-white/5 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 text-[10px] font-black tracking-widest uppercase items-center gap-2 text-brand-400 shadow-[0_0_15px_rgba(0,0,0,0.5)]">
               <span className="w-2 h-2 rounded-full bg-brand-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>

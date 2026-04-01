@@ -55,14 +55,14 @@ const LandingPage = ({ onGetStarted }) => {
               <a href="#" className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-brand-400 transition-colors">Documentation</a>
             </div>
 
-            <button 
-              onClick={onGetStarted}
-              className="flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2 sm:py-2.5 bg-white/10 hover:bg-white text-white hover:text-slate-950 border border-white/10 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-lg hover:shadow-white/10"
-            >
-              <User size={12} className="sm:w-[14px] sm:h-[14px]" />
-              <span className="hidden xs:inline">Citizen Login</span>
-              <span className="xs:hidden">Login</span>
-            </button>
+            <div className="flex md:hidden">
+              <button 
+                onClick={onGetStarted}
+                className="flex items-center gap-1.5 px-4 py-2 bg-brand-500 text-slate-950 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-lg"
+              >
+                Get Started
+              </button>
+            </div>
           </div>
         </div>
       </nav>

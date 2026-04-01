@@ -1,0 +1,3 @@
+Testing connection to: ac-nwlayhh-shard-00-00.rmoycgw.mongodb.net:27017,ac-nwlayhh-shard-00-01.rmoycgw.mongodb.net:27017,ac-nwlayhh-shard-00-02.rmoycgw.mongodb.net:27017/?ssl=true&replicaSet=atlas-qvniez-shard-0&authSource=admin&appName=MySandbox
+Connection failed: AC400000:error:0A000438:SSL routines:ssl3_read_bytes:tlsv1 alert internal error:openssl\ssl\record\rec_layer_s3.c:918:SSL alert number 80
+
