@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import LandingPage from './ui-ux/LandingPage';
 import ProfileForm from './ui-ux/ProfileForm';
@@ -26,7 +26,8 @@ function App() {
     const payload = { ...profileData, preferred_language: selectedLanguage };
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL ? `${import.meta.env.VITE_API_URL}/api/check` : 'http://localhost:5001/api/check';
+      const baseUrl = import.meta.env.VITE_API_URL || '';
+      const apiUrl = baseUrl ? `${baseUrl}/api/check` : 'http://localhost:5001/api/check';
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
