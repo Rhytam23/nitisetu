@@ -9,7 +9,8 @@ const PORT = process.env.PORT || 5001;
 const startServer = async () => {
     const dbSuccess = await connectDB();
     
-    app.listen(PORT, () => {
+    // Explicitly bind to '0.0.0.0' for cloud container compatibility (Render / Docker / Vercel)
+    app.listen(PORT, '0.0.0.0', () => {
         if (dbSuccess) {
             console.log(`Server running on port ${PORT} (Database Connected)`);
         } else {
