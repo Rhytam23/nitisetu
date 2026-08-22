@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Mic, MicOff, Send, Loader2, Volume2, Target, CheckCircle2, ShieldCheck, Sparkles } from 'lucide-react';
+import { Mic, MicOff, CheckCircle2, ShieldCheck, Sparkles, Target, HelpCircle } from 'lucide-react';
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -129,164 +129,168 @@ const ProfileForm = ({ onProfileSubmit, selectedLanguage }) => {
   };
 
   return (
-    <div className="bg-slate-900/80 backdrop-blur-3xl rounded-[1.5rem] sm:rounded-[2rem] shadow-[0_30px_60px_rgba(0,0,0,0.5)] border border-white/10 p-5 sm:p-8 w-full max-w-2xl mx-auto relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-brand-500/20 blur-3xl sm:blur-[60px] rounded-full pointer-events-none"></div>
+    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 w-full max-w-2xl mx-auto space-y-6">
       
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8 relative z-10">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight drop-shadow-sm flex items-center gap-3">
-            Farmer Profile
-            <span className="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 bg-brand-500/10 text-brand-400 border border-brand-500/20 rounded-full">
-              Sector 4.0
-            </span>
+          <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+            Farmer Profile Details
           </h2>
-          <p className="text-slate-400 font-medium text-sm sm:text-base">Fill manually or use smart voice assistance</p>
+          <p className="text-slate-400 text-xs sm:text-sm font-normal mt-0.5">
+            Enter landholding parameters or use voice transcript assistance
+          </p>
         </div>
         
         {/* Voice Interface Button */}
         <button 
           type="button"
           onClick={toggleListening}
-          className={`flex items-center justify-center gap-2 px-5 py-3 rounded-full shadow-lg transition-all border w-full sm:w-auto ${
+          className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl transition-colors border font-semibold text-xs w-full sm:w-auto ${
             isListening 
-              ? 'bg-red-500 hover:bg-red-600 text-white border-red-400 animate-pulse shadow-[0_0_20px_rgba(239,68,68,0.5)]' 
-              : 'bg-white/5 text-slate-300 border-white/10 hover:bg-white/10 shadow-[0_0_15px_rgba(255,255,255,0.05)]'
+              ? 'bg-red-500/20 text-red-300 border-red-500/40' 
+              : 'bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-700'
           }`}
         >
-          {isListening ? <MicOff size={18} /> : <Mic size={18} className="text-brand-400" />}
-          <span className="font-bold text-xs sm:text-sm tracking-wide">{isListening ? 'Stop Listening' : 'Voice Input'}</span>
+          {isListening ? <MicOff size={16} /> : <Mic size={16} className="text-teal-400" />}
+          <span>{isListening ? 'Stop Speech Recording' : 'Voice Input Assistant'}</span>
         </button>
       </div>
 
       {/* Voice Listening Stream Banner */}
       {isListening && (
-        <div className="mb-6 bg-red-500/10 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-red-500/20 shadow-inner">
-          <p className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-red-400 mb-2 flex items-center gap-2">
-            <Volume2 size={14} className="animate-pulse" />
-            Live Voice Stream
-          </p>
-          <p className="text-white font-medium italic text-base sm:text-lg">"{voiceText || 'Speak your land size, state, crop...'}"</p>
+        <div className="bg-red-950/40 border border-red-800/40 p-4 rounded-xl space-y-1">
+          <p className="text-xs font-bold uppercase tracking-wider text-red-400">Listening to Speech Transcript...</p>
+          <p className="text-white text-sm font-medium italic">"{voiceText || 'State your landholding size, crop, state, and age...'}"</p>
         </div>
       )}
 
       {/* Voice Extraction Preview Modal / Card */}
       {extractedPreview && (
-        <div className="mb-6 bg-brand-500/10 backdrop-blur-md p-5 rounded-2xl border border-brand-500/30 shadow-xl animate-fade-in">
-          <div className="flex items-center justify-between mb-3">
-            <h4 className="text-sm font-black text-brand-300 flex items-center gap-2 uppercase tracking-wider">
-              <Sparkles size={16} />
-              Extracted Entities Preview
+        <div className="bg-teal-950/40 border border-teal-800/40 p-4 rounded-xl space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="text-xs font-bold text-teal-300 uppercase tracking-wider flex items-center gap-1.5">
+              <Sparkles size={14} />
+              Extracted Profile Parameters
             </h4>
-            <span className="text-[10px] text-slate-400 font-bold uppercase">Review Before Applying</span>
+            <span className="text-[10px] text-slate-400 font-medium">Review & Confirm</span>
           </div>
           
-          <div className="grid grid-cols-2 gap-3 text-xs text-slate-300 font-medium mb-4">
-            {extractedPreview.land_acres && <div><span className="text-slate-500">Land:</span> {extractedPreview.land_acres} Acres</div>}
-            {extractedPreview.crop && <div><span className="text-slate-500">Crop:</span> {extractedPreview.crop}</div>}
-            {extractedPreview.state && <div><span className="text-slate-500">State:</span> {extractedPreview.state}</div>}
-            {extractedPreview.aadhaar && <div><span className="text-slate-500">Aadhaar:</span> XXXX-XXXX-{extractedPreview.aadhaar.slice(-4)}</div>}
+          <div className="grid grid-cols-2 gap-2 text-xs text-slate-300 font-normal">
+            {extractedPreview.land_acres && <div><strong className="text-slate-400">Land:</strong> {extractedPreview.land_acres} Acres</div>}
+            {extractedPreview.crop && <div><strong className="text-slate-400">Crop:</strong> {extractedPreview.crop}</div>}
+            {extractedPreview.state && <div><strong className="text-slate-400">State:</strong> {extractedPreview.state}</div>}
+            {extractedPreview.aadhaar && <div><strong className="text-slate-400">Aadhaar:</strong> XXXX-XXXX-{extractedPreview.aadhaar.slice(-4)}</div>}
           </div>
 
           <button
             type="button"
             onClick={confirmVoiceExtraction}
-            className="w-full flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-400 text-slate-950 font-bold py-2.5 rounded-xl text-xs uppercase tracking-wider transition-all"
+            className="w-full flex items-center justify-center gap-2 bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold py-2 rounded-lg text-xs transition-colors"
           >
-            <CheckCircle2 size={16} />
-            Confirm & Auto-fill Form
+            <CheckCircle2 size={14} />
+            Apply Voice Data to Form
           </button>
         </div>
       )}
 
-      {/* Profile Form */}
-      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-          <div className="group">
-            <label className="block text-[10px] sm:text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">State *</label>
+      {/* Profile Input Form */}
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5">State *</label>
             <input 
               type="text" name="state" value={profile.state} onChange={handleChange} required
-              className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-black/30 border border-white/10 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none text-white font-medium text-sm placeholder-slate-600"
+              className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl focus:border-teal-500 outline-none text-white text-sm"
               placeholder="e.g. Uttar Pradesh"
             />
           </div>
-          <div className="group">
-            <label className="block text-[10px] sm:text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">District</label>
+          
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5">District</label>
             <input 
               type="text" name="district" value={profile.district} onChange={handleChange}
-              className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-black/30 border border-white/10 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none text-white font-medium text-sm placeholder-slate-600"
+              className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl focus:border-teal-500 outline-none text-white text-sm"
               placeholder="e.g. Varanasi"
             />
           </div>
-          <div className="group">
-            <label className="block text-[10px] sm:text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Land Holding (Acres) *</label>
+          
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-semibold text-slate-300">Landholding (Acres) *</label>
+              <span className="text-[10px] text-slate-400 font-normal">1 Acre = 0.404 Ha</span>
+            </div>
             <input 
               type="number" step="0.1" name="land_acres" value={profile.land_acres} onChange={handleChange} required
-              className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-black/30 border border-white/10 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none text-white font-medium text-sm placeholder-slate-600"
+              className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl focus:border-teal-500 outline-none text-white text-sm"
               placeholder="e.g. 2.5"
             />
           </div>
-          <div className="group">
-            <label className="block text-[10px] sm:text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Crop Type</label>
+          
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5">Primary Crop Type</label>
             <input 
               type="text" name="crop" value={profile.crop} onChange={handleChange}
-              className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-black/30 border border-white/10 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none text-white font-medium text-sm placeholder-slate-600"
-              placeholder="e.g. Wheat, Rice"
+              className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl focus:border-teal-500 outline-none text-white text-sm"
+              placeholder="e.g. Wheat, Paddy, Mustard"
             />
           </div>
-          <div className="group">
-            <div className="flex items-center justify-between mb-2">
-              <label className="block text-[10px] sm:text-xs font-bold uppercase tracking-widest text-slate-400">Aadhaar Number (Optional)</label>
-              <span className="text-[9px] text-emerald-400 font-bold flex items-center gap-1">
-                <ShieldCheck size={12} /> Privacy Protected
+          
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-semibold text-slate-300">Aadhaar (Optional)</label>
+              <span className="text-[10px] text-teal-400 font-medium flex items-center gap-1">
+                <ShieldCheck size={12} /> Data Minimization
               </span>
             </div>
             <input 
               type="text" name="aadhaar" value={profile.aadhaar} onChange={handleChange}
-              className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-black/30 border border-white/10 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none text-white font-medium text-sm placeholder-slate-600"
-              placeholder="e.g. 123456789012"
+              className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl focus:border-teal-500 outline-none text-white text-sm placeholder-slate-600"
+              placeholder="Optional e.g. 123456789012"
               maxLength="12"
             />
           </div>
-          <div className="group">
-            <label className="block text-[10px] sm:text-xs font-bold uppercase tracking-widest text-slate-400 mb-2">Social Category</label>
+          
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5">Social Category</label>
             <select 
               name="social_category" value={profile.social_category} onChange={handleChange}
-              className="w-full px-4 sm:px-5 py-3 sm:py-4 bg-black/30 border border-white/10 rounded-xl focus:ring-2 focus:ring-brand-500 outline-none text-white font-medium text-sm"
+              className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl focus:border-teal-500 outline-none text-white text-sm"
             >
-              <option value="General" className="bg-slate-900">General</option>
-              <option value="OBC" className="bg-slate-900">OBC</option>
-              <option value="SC" className="bg-slate-900">SC</option>
-              <option value="ST" className="bg-slate-900">ST</option>
+              <option value="General">General</option>
+              <option value="OBC">OBC</option>
+              <option value="SC">SC</option>
+              <option value="ST">ST</option>
             </select>
           </div>
         </div>
 
-        {/* Scheme Selection & Auto-Discovery Toggle */}
-        <div className="pt-4 sm:pt-6 mt-2 border-t border-white/5">
-          <label className="block text-[10px] sm:text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">Scheme Discovery & Evaluation</label>
+        {/* Scheme Selection Radio Group */}
+        <div className="pt-4 border-t border-slate-800 space-y-2">
+          <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">Target Scheme Evaluation</label>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-             <label className={`flex items-center gap-3 cursor-pointer p-3 sm:p-4 border rounded-xl transition-all ${profile.scheme === 'Auto-Discover' ? 'bg-brand-500/20 border-brand-500 shadow-[0_0_15px_rgba(16,185,129,0.2)]' : 'bg-black/20 border-white/10 hover:bg-white/5'}`}>
-               <input type="radio" name="scheme" value="Auto-Discover" checked={profile.scheme === 'Auto-Discover'} onChange={handleChange} className="w-4 h-4 text-brand-500"/>
-               <span className="font-bold text-white text-xs sm:text-sm">Auto-Discover All</span>
+             <label className={`flex items-center gap-2.5 p-3 rounded-xl border cursor-pointer text-xs font-semibold transition-colors ${profile.scheme === 'Auto-Discover' ? 'bg-teal-500/10 border-teal-500 text-teal-300' : 'bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-700'}`}>
+               <input type="radio" name="scheme" value="Auto-Discover" checked={profile.scheme === 'Auto-Discover'} onChange={handleChange} className="text-teal-500"/>
+               <span>Auto-Discover All Schemes</span>
              </label>
-             <label className={`flex items-center gap-3 cursor-pointer p-3 sm:p-4 border rounded-xl transition-all ${profile.scheme === 'PM-KISAN' ? 'bg-brand-500/20 border-brand-500 shadow-[0_0_15px_rgba(16,185,129,0.2)]' : 'bg-black/20 border-white/10 hover:bg-white/5'}`}>
-               <input type="radio" name="scheme" value="PM-KISAN" checked={profile.scheme === 'PM-KISAN'} onChange={handleChange} className="w-4 h-4 text-brand-500"/>
-               <span className="font-bold text-white text-xs sm:text-sm">PM-KISAN</span>
+             <label className={`flex items-center gap-2.5 p-3 rounded-xl border cursor-pointer text-xs font-semibold transition-colors ${profile.scheme === 'PM-KISAN' ? 'bg-teal-500/10 border-teal-500 text-teal-300' : 'bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-700'}`}>
+               <input type="radio" name="scheme" value="PM-KISAN" checked={profile.scheme === 'PM-KISAN'} onChange={handleChange} className="text-teal-500"/>
+               <span>PM-KISAN</span>
              </label>
-             <label className={`flex items-center gap-3 cursor-pointer p-3 sm:p-4 border rounded-xl transition-all ${profile.scheme === 'PM-KUSUM' ? 'bg-brand-500/20 border-brand-500 shadow-[0_0_15px_rgba(16,185,129,0.2)]' : 'bg-black/20 border-white/10 hover:bg-white/5'}`}>
-               <input type="radio" name="scheme" value="PM-KUSUM" checked={profile.scheme === 'PM-KUSUM'} onChange={handleChange} className="w-4 h-4 text-brand-500"/>
-               <span className="font-bold text-white text-xs sm:text-sm">PM-KUSUM</span>
+             <label className={`flex items-center gap-2.5 p-3 rounded-xl border cursor-pointer text-xs font-semibold transition-colors ${profile.scheme === 'PM-KUSUM' ? 'bg-teal-500/10 border-teal-500 text-teal-300' : 'bg-slate-950 border-slate-800 text-slate-300 hover:border-slate-700'}`}>
+               <input type="radio" name="scheme" value="PM-KUSUM" checked={profile.scheme === 'PM-KUSUM'} onChange={handleChange} className="text-teal-500"/>
+               <span>PM-KUSUM</span>
              </label>
           </div>
         </div>
 
-        <div className="pt-6">
+        <div className="pt-2">
           <button 
             type="submit"
-            className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-brand-500 to-brand-400 hover:from-brand-400 hover:to-cyan-400 text-slate-950 font-black py-4 px-6 rounded-xl transition-all shadow-[0_0_30px_rgba(16,185,129,0.3)] hover:shadow-[0_0_50px_rgba(16,185,129,0.5)] hover:-translate-y-1 text-sm sm:text-base uppercase tracking-wider"
+            className="w-full flex items-center justify-center gap-2 bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold py-3.5 px-6 rounded-xl transition-colors text-sm shadow-sm"
           >
-            <Target size={20} />
-            Evaluate Eligibility & Proof
+            <Target size={18} />
+            Evaluate Eligibility & Policy Proof
           </button>
         </div>
       </form>
