@@ -1,15 +1,35 @@
-import { useState, useRef } from 'react';
-import { CheckCircle, XCircle, FileText, Bookmark, Volume2, SquarePlay, MapPin, ExternalLink, HelpCircle, ChevronRight, Layers } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { CheckCircle, XCircle, FileText, Bookmark, Volume2, SquarePlay, MapPin, ExternalLink, HelpCircle, ChevronRight, Layers, ShieldCheck, Upload } from 'lucide-react';
 
-const ProofCard = ({ result, schemeName, selectedLanguage }) => {
+const ProofCard = ({ result, schemeName, selectedLanguage, farmerId = 'demo_farmer_1', onNavigateToVault }) => {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [vaultDocs, setVaultDocs] = useState([]);
   const synthRef = useRef(window.speechSynthesis);
+
+  useEffect(() => {
+    fetchVaultDocuments();
+  }, [farmerId]);
+
+  const fetchVaultDocuments = async () => {
+    try {
+      const baseUrl = import.meta.env.VITE_API_URL || '';
+      const res = await fetch(`${baseUrl}/api/documents/${farmerId}`);
+      const data = await res.json();
+      if (data.success && Array.isArray(data.data)) {
+        setVaultDocs(data.data);
+      }
+    } catch (e) {
+      console.error('Error checking vault:', e);
+    }
+  };
 
   if (!result) return null;
 
   const isEligible = result.status === 'Eligible' || result.status === 'पात्र';
   const guidance = result.application_guidance || {};
   const discoveredSchemes = result.discovered_schemes || [];
+
+  const availableDocTypes = new Set(vaultDocs.map(d => d.documentType));
 
   const playTTS = () => {
     if (synthRef.current.speaking) {
@@ -36,6 +56,13 @@ const ProofCard = ({ result, schemeName, selectedLanguage }) => {
     utterance.onend = () => setIsPlaying(false);
     synthRef.current.speak(utterance);
     setIsPlaying(true);
+  };
+
+  const isDocumentInVault = (docName) => {
+    if (docName.toLowerCase().includes('aadhaar') && availableDocTypes.has('Aadhaar')) return true;
+    if ((docName.toLowerCase().includes('land') || docName.toLowerCase().includes('jamabandi')) && availableDocTypes.has('Land Ownership Record (Jamabandi)')) return true;
+    if (docName.toLowerCase().includes('bank') && availableDocTypes.has('Bank Passbook')) return true;
+    return false;
   };
 
   return (
@@ -87,7 +114,7 @@ const ProofCard = ({ result, schemeName, selectedLanguage }) => {
             <h4 className="flex items-center gap-2 text-xs font-bold text-emerald-400 uppercase tracking-wider">
               <Bookmark size={14} className="text-emerald-400" /> Verbatim Policy Evidence (Original Text)
             </h4>
-            <span className="text-[10px] font-medium text-slate-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
+            <span className="text-[9px] font-medium text-slate-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
               Untranslated Legal Quote
             </span>
           </div>
@@ -118,21 +145,44 @@ const ProofCard = ({ result, schemeName, selectedLanguage }) => {
               </div>
             </div>
 
-            {/* Required Documents Checklist with How to Obtain */}
+            {/* Required Documents Checklist with Document Vault Connection */}
             {result.required_documents && result.required_documents.length > 0 && (
               <div>
-                <h4 className="flex items-center gap-1.5 text-xs font-bold text-slate-300 uppercase tracking-wider mb-3">
-                  <CheckCircle size={14} className="text-teal-400" /> Required Documents Checklist & Where to Obtain
-                </h4>
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="flex items-center gap-1.5 text-xs font-bold text-slate-300 uppercase tracking-wider">
+                    <CheckCircle size={14} className="text-teal-400" /> Required Documents & Vault Cross-Check
+                  </h4>
+                  <span className="text-[10px] text-teal-400 font-medium flex items-center gap-1">
+                    <ShieldCheck size={12} /> Document Vault Sync
+                  </span>
+                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {result.required_documents.map((doc, idx) => {
                     const docInfo = guidance.document_acquisition_guide?.[doc] || {};
+                    const inVault = isDocumentInVault(doc);
                     return (
-                      <div key={idx} className="bg-slate-950 p-3.5 rounded-xl border border-slate-800/80 space-y-1.5">
-                        <div className="flex items-center gap-2 font-semibold text-white text-xs">
-                          <CheckCircle size={14} className="text-emerald-400 shrink-0" />
-                          <span>{doc}</span>
+                      <div key={idx} className="bg-slate-950 p-3.5 rounded-xl border border-slate-800/80 space-y-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2 font-semibold text-white text-xs">
+                            <CheckCircle size={14} className="text-emerald-400 shrink-0" />
+                            <span>{doc}</span>
+                          </div>
+                          
+                          {inVault ? (
+                            <span className="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 text-[9px] font-bold">
+                              ✓ Available in Vault
+                            </span>
+                          ) : (
+                            <button
+                              onClick={onNavigateToVault}
+                              className="px-2 py-0.5 rounded bg-amber-950 hover:bg-amber-900 text-amber-300 border border-amber-800 text-[9px] font-bold flex items-center gap-1"
+                            >
+                              <Upload size={10} /> Upload to Vault
+                            </button>
+                          )}
                         </div>
+
                         {docInfo.why_needed && (
                           <p className="text-[11px] text-slate-400 leading-snug"><strong className="text-slate-500">Why:</strong> {docInfo.why_needed}</p>
                         )}

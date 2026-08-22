@@ -1,27 +1,39 @@
 import { useState } from 'react';
-import { Loader2, ArrowLeft, ShieldCheck } from 'lucide-react';
+import { Loader2, ArrowLeft, ShieldCheck, FolderLock, Target } from 'lucide-react';
 import LandingPage from './ui-ux/LandingPage';
 import ProfileForm from './ui-ux/ProfileForm';
 import ProofCard from './ui-ux/ProofCard';
+import DocumentVault from './ui-ux/DocumentVault';
+import NotificationCenter from './ui-ux/NotificationCenter';
 import LanguageSelector from './ui-ux/LanguageSelector';
 import './index.css';
 
 function App() {
-  const [view, setView] = useState('landing'); // 'landing', 'tool'
+  const [view, setView] = useState('landing'); // 'landing', 'tool', 'vault'
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [currentScheme, setCurrentScheme] = useState('');
   const [selectedLanguage, setSelectedLanguage] = useState('en');
+  const [farmerId, setFarmerId] = useState('demo_farmer_1');
+
+  const [farmerProfile, setFarmerProfile] = useState({
+    state: 'Uttar Pradesh',
+    land_acres: '2.5',
+    crop: 'Wheat',
+    age: '30'
+  });
 
   const handleProfileSubmit = async (profileData) => {
     setLoading(true);
     setError(null);
     setResult(null);
     setCurrentScheme(profileData.scheme);
-    
-    // Supplement profile with current language
-    const payload = { ...profileData, preferred_language: selectedLanguage };
+    setFarmerProfile(profileData);
+
+    if (profileData.phone) setFarmerId(`farmer_${profileData.phone}`);
+
+    const payload = { ...profileData, preferred_language: selectedLanguage, _id: farmerId };
 
     try {
       const baseUrl = import.meta.env.VITE_API_URL || '';
@@ -38,6 +50,18 @@ function App() {
       
       if (data.success) {
         setResult(data.data);
+
+        // Auto-generate notifications for profile
+        try {
+          await fetch(`${baseUrl}/api/notifications/generate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ _id: farmerId, ...profileData })
+          });
+        } catch (e) {
+          console.error('Notification trigger error:', e);
+        }
+
         // Scroll to results
         setTimeout(() => {
           document.getElementById('result-section')?.scrollIntoView({ behavior: 'smooth' });
@@ -53,6 +77,10 @@ function App() {
     }
   };
 
+  const handleUpdateProfileFromOCR = (updatedFields) => {
+    setFarmerProfile(prev => ({ ...prev, ...updatedFields }));
+  };
+
   if (view === 'landing') {
     return <LandingPage onGetStarted={() => setView('tool')} />;
   }
@@ -60,9 +88,10 @@ function App() {
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col font-sans selection:bg-teal-500/30 selection:text-teal-200 relative text-slate-200">
       
-      {/* Header */}
+      {/* Top Header */}
       <header className="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+          
           <div className="flex items-center gap-3">
             <button 
               onClick={() => setView('landing')}
@@ -75,61 +104,107 @@ function App() {
               <p className="text-teal-400 text-[10px] font-semibold uppercase tracking-wider hidden sm:block">Government Scheme Access</p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <LanguageSelector onLanguageChange={setSelectedLanguage} />
-            <div className="hidden sm:flex bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800 text-xs font-semibold tracking-wide items-center gap-2 text-teal-400">
-              <ShieldCheck size={14} className="text-teal-400" />
-              Policy Engine Online
+
+          {/* Navigation Controls & Notification Center */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            
+            {/* View Switcher Tabs */}
+            <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs font-semibold">
+              <button
+                onClick={() => setView('tool')}
+                className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
+                  view === 'tool' ? 'bg-teal-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <Target size={14} /> Evaluation
+              </button>
+              <button
+                onClick={() => setView('vault')}
+                className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
+                  view === 'vault' ? 'bg-teal-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <FolderLock size={14} /> Vault
+              </button>
             </div>
+
+            <NotificationCenter farmerId={farmerId} onNavigate={(route) => {
+              if (route === '/vault') setView('vault');
+              else setView('tool');
+            }} />
+
+            <LanguageSelector onLanguageChange={setSelectedLanguage} />
           </div>
+
         </div>
       </header>
 
-      {/* Main Content Dashboard */}
-      <main className="flex-grow max-w-4xl mx-auto w-full px-4 sm:px-6 py-8 sm:py-10 space-y-8 relative z-10">
+      {/* Main Dashboard Views */}
+      <main className="flex-grow max-w-4xl mx-auto w-full px-4 sm:px-6 py-8 space-y-8 relative z-10">
         
-        <section>
-          <div className="text-center mb-8">
-            <span className="px-3 py-1 bg-teal-500/10 text-teal-300 border border-teal-500/20 rounded-full text-xs font-semibold uppercase tracking-wider mb-3 inline-block">Step 1: Farmer Parameters</span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Evaluate Scheme Eligibility</h2>
-            <p className="text-slate-400 mt-2 max-w-xl mx-auto font-normal text-sm">
-              Provide your landholding parameters below. The system evaluates your details against active government operational guidelines in real-time.
-            </p>
-          </div>
-          
-          <ProfileForm onProfileSubmit={handleProfileSubmit} selectedLanguage={selectedLanguage} />
-        </section>
+        {view === 'vault' ? (
+          <DocumentVault 
+            farmerId={farmerId} 
+            selectedLanguage={selectedLanguage} 
+            currentProfile={farmerProfile}
+            onUpdateProfile={handleUpdateProfileFromOCR}
+          />
+        ) : (
+          <>
+            <section>
+              <div className="text-center mb-8">
+                <span className="px-3 py-1 bg-teal-500/10 text-teal-300 border border-teal-500/20 rounded-full text-xs font-semibold uppercase tracking-wider mb-3 inline-block">
+                  Step 1: Farmer Parameters
+                </span>
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Evaluate Scheme Eligibility</h2>
+                <p className="text-slate-400 mt-2 max-w-xl mx-auto font-normal text-sm">
+                  Provide your landholding parameters below. The system evaluates your details against active government operational guidelines in real-time.
+                </p>
+              </div>
+              
+              <ProfileForm onProfileSubmit={handleProfileSubmit} selectedLanguage={selectedLanguage} />
+            </section>
 
-        {/* Loading State */}
-        {loading && (
-          <div className="flex flex-col items-center justify-center p-10 bg-slate-900 rounded-2xl border border-slate-800 text-center space-y-4">
-            <Loader2 className="w-10 h-10 text-teal-400 animate-spin" />
-            <div>
-              <h3 className="text-lg font-bold text-white">Searching Government Policy Knowledge Base...</h3>
-              <p className="text-slate-400 text-xs font-normal mt-1">Retrieving vector embeddings from MongoDB Atlas and verifying legal guidelines</p>
-            </div>
-          </div>
-        )}
+            {/* Loading State */}
+            {loading && (
+              <div className="flex flex-col items-center justify-center p-10 bg-slate-900 rounded-2xl border border-slate-800 text-center space-y-4">
+                <Loader2 className="w-10 h-10 text-teal-400 animate-spin" />
+                <div>
+                  <h3 className="text-lg font-bold text-white">Searching Government Policy Knowledge Base...</h3>
+                  <p className="text-slate-400 text-xs font-normal mt-1">Retrieving vector embeddings from MongoDB Atlas and verifying legal guidelines</p>
+                </div>
+              </div>
+            )}
 
-        {/* Error State */}
-        {error && (
-          <div className="bg-red-950/40 border border-red-800/60 p-5 rounded-2xl">
-            <div className="flex items-center gap-2 text-red-400 font-bold mb-1 text-xs uppercase tracking-wider">
-               <span className="w-2 h-2 bg-red-400 rounded-full"></span>
-               System Notice
-            </div>
-            <p className="text-red-200 text-sm font-medium">{error}</p>
-          </div>
-        )}
+            {/* Error State */}
+            {error && (
+              <div className="bg-red-950/40 border border-red-800/60 p-5 rounded-2xl">
+                <div className="flex items-center gap-2 text-red-400 font-bold mb-1 text-xs uppercase tracking-wider">
+                   <span className="w-2 h-2 bg-red-400 rounded-full"></span>
+                   System Notice
+                </div>
+                <p className="text-red-200 text-sm font-medium">{error}</p>
+              </div>
+            )}
 
-        {/* Result Card */}
-        {(!loading && result) && (
-           <section className="scroll-mt-20" id="result-section">
-              <div className="text-center mb-6">
-                <span className="px-3 py-1 bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 rounded-full text-xs font-semibold uppercase tracking-wider mb-2 inline-block">Step 2: Verification Verdict</span>
-             </div>
-             <ProofCard result={result} schemeName={currentScheme} selectedLanguage={selectedLanguage} />
-           </section>
+            {/* Result Card */}
+            {(!loading && result) && (
+               <section className="scroll-mt-20" id="result-section">
+                  <div className="text-center mb-6">
+                    <span className="px-3 py-1 bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 rounded-full text-xs font-semibold uppercase tracking-wider mb-2 inline-block">
+                      Step 2: Verification Verdict
+                    </span>
+                 </div>
+                 <ProofCard 
+                   result={result} 
+                   schemeName={currentScheme} 
+                   selectedLanguage={selectedLanguage} 
+                   farmerId={farmerId}
+                   onNavigateToVault={() => setView('vault')}
+                 />
+               </section>
+            )}
+          </>
         )}
       </main>
 
