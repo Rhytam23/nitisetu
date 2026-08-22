@@ -1,0 +1,5 @@
+Testing connection to: cluster0.n9xvo6s.mongodb.net/niti-setu?retryWrites=true&w=majority
+Successfully connected to MongoDB Atlas!
+Available Databases:
+ - admin
+ - local
