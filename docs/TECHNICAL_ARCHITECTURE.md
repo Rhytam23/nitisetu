@@ -1,95 +1,172 @@
-# Niti-Setu — Technical Architecture Document
+# Niti-Setu — Comprehensive Technical Architecture & Component Structure
 
 ---
 
-## 1. Technical Stack Breakdown
+## 1. High-Level System Architecture
 
-### Frontend Stack `[IMPLEMENTED]`
-- **Framework**: React 18.3.1
-- **Build Tool / Bundler**: Vite 5.4.2
-- **Styling**: Tailwind CSS 3.4.10 + Vanilla CSS utilities (`index.css`)
-- **Icons**: `lucide-react` 0.446.0
-- **Browser APIs**:
-  - `window.SpeechRecognition` / `window.webkitSpeechRecognition` (Voice Input STT)
-  - `window.speechSynthesis` (Verdict TTS Audio Playback)
-- **External Scripts**: `https://translate.google.com/translate_a/element.js` (Hidden DOM Google Translate engine for 23 Indian languages)
-
-### Backend Stack `[IMPLEMENTED]`
-- **Runtime**: Node.js 18+ (ES Modules `"type": "module"`)
-- **Web Framework**: Express 5.2.1
-- **Database ODM**: Mongoose 9.3.0
-- **Native MongoDB Driver**: `mongodb` 6.13.0
-- **Middleware**: `cors` 2.8.6, `express.json()`
-- **PDF Parsing**: `pdf-parse` 2.4.5, `@langchain/community` PDFLoader
-- **Logging**: Synchronous file logger to `eligibility_error.log` via `fs.appendFileSync`
-
-### AI & LangChain Stack `[IMPLEMENTED]`
-- **LLM Model**: `ChatGoogleGenerativeAI` (`gemini-1.5-pro`, `temperature: 0`)
-- **Embedding Model**: `GoogleGenerativeAIEmbeddings` (`gemini-embedding-2-preview` / `text-embedding-004`)
-- **Framework**: `@langchain/core` 1.1.34, `@langchain/google-genai` 2.1.26, `@langchain/mongodb` 1.1.0, `@langchain/textsplitters` 1.0.1, `langchain` 1.2.32
-- **Chains**: `PromptTemplate` for system prompt formatting
-
-### Database Stack `[IN PROGRESS]` `[BLOCKED]`
-- **Vector Storage**: MongoDB Atlas Vector Search
-  - Database: `niti-setu`
-  - Collection: `scheme_documents`
-  - Index Name: `vector_index` (Cosine similarity, 768 dimensions over `embedding` field)
-- **Document Storage**: MongoDB Atlas Mongoose Connection (`Farmer` schema)
-
----
-
-## 2. Environment Configuration
-
-### Backend Environment (`backend/.env`)
-```env
-PORT=5001
-MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/niti-setu?retryWrites=true&w=majority
-GOOGLE_API_KEY=AIzaSy...
 ```
-
-### Frontend Environment (`frontend/.env.production`)
-```env
-VITE_API_URL=http://localhost:5001
+                                  +---------------------------------------+
+                                  |         React + Vite Frontend         |
+                                  |  (Landing, Form, ProofCard, Vault)    |
+                                  +-------------------+-------------------+
+                                                      |
+                                           REST API (HTTPS / JSON)
+                                                      |
+                                                      v
+                                  +---------------------------------------+
+                                  |        Express.js Backend API         |
+                                  |      (Port 5001 / Controllers)        |
+                                  +---------+-------------------+---------+
+                                            |                   |
+                     +----------------------+                   +----------------------+
+                     |                                                                 |
+                     v                                                                 v
++------------------------------------------+                       +------------------------------------------+
+|            AI & OCR Pipeline             |                       |          Data & Vector Storage           |
+|                                          |                       |                                          |
+| 1. Text-Native PDF: pdf-parse            |                       | 1. MongoDB Atlas:                        |
+| 2. Scanned Image/PDF: Cloud Vision API   |                       |    - farmer_documents                    |
+| 3. Entity Parsing: Gemini 1.5 Flash      |                       |    - notifications                       |
+| 4. Vector Search: LangChain Google GenAI |                       |    - farmer_profiles                     |
++------------------------------------------+                       | 2. MongoDB Vector Index (3072 dims)      |
+                                                                   | 3. Local Uploads: backend/uploads/       |
+                                                                   +------------------------------------------+
 ```
 
 ---
 
-## 3. Error Handling & Circuit Breaker Strategy
+## 2. Technology Stack & Component Mapping
 
-Niti-Setu implements a defensive fallback wrapper around all AI and database calls in `backend/routes/eligibility.js`.
-
-```javascript
-try {
-    // 1. Check env vars
-    if (!process.env.MONGODB_URI || !process.env.GOOGLE_API_KEY) {
-        throw new Error("Configuration incomplete. Skipping AI Engine.");
-    }
-    // 2. Query MongoDB Vector Store & Gemini 1.5 Pro
-    ...
-} catch (ragError) {
-    console.warn("Niti-Setu Fallback Triggered:", ragError.message);
-    usedMock = true;
-    // 3. Execute synchronized local rules for PM-KISAN, PM-KMY, PM-KUSUM
-    ...
-    return sendResponse(res, 200, true, "Eligibility checked successfully.", jsonResult, null, { engine: "Logic-Fallback" });
-}
-```
-
-### Key Error Behaviors:
-- **Server Startup Resilience**: `server.js` boots the Express HTTP server even if MongoDB connection throws an error, logging `Server running in limited mode (DB Offline)` ([server.js:L33](file:///e:/nitisetu/backend/server.js#L33)).
-- **503 Service Unavailable**: Profile CRUD endpoints return `503 Service Unavailable` if `mongoose.connection.readyState !== 1` ([eligibility.js:L322](file:///e:/nitisetu/backend/routes/eligibility.js#L322)).
-- **409 Conflict**: Duplicate `phone` or `aadhaar` creation attempts catch MongoDB E11000 duplicate key errors and return HTTP 409 ([eligibility.js:L336](file:///e:/nitisetu/backend/routes/eligibility.js#L336)).
-- **Error Logging**: All unhandled route exceptions write detailed stack traces to `eligibility_error.log`.
+| Domain | Technology / Library | Where It Is Used | Purpose & Functionality |
+|---|---|---|---|
+| **Frontend UI** | React 18 + Vite | `frontend/src/` | Single Page Application framework providing fast UI rendering and hot module reloading |
+| **Styling** | Custom Vanilla CSS | `frontend/src/index.css` | Tailored high-contrast dark theme styling with glassmorphism and custom scrollbars |
+| **Icons** | Lucide React | `frontend/src/ui-ux/*.jsx` | Clean vector iconography (`ShieldCheck`, `FileText`, `Sparkles`, `Bell`, `Upload`) |
+| **Voice Speech-to-Text** | Web Speech API | `frontend/src/ui-ux/ProfileForm.jsx` | Native browser speech recognition modal allowing farmers to speak details in regional languages |
+| **Audio Text-to-Speech** | SpeechSynthesis API | `frontend/src/ui-ux/ProofCard.jsx` | Audio playback of eligibility explanations in localized Indian voices (`hi-IN`, `ta-IN`, etc.) |
+| **Backend Server** | Node.js + Express 5 | `backend/server.js` | RESTful API server handling HTTP routing, middleware validation, and controllers |
+| **File Upload Handling** | Multer | `backend/routes/eligibility.js` | Parses `multipart/form-data` uploads with 5MB file ceiling and memory buffering |
+| **Database & ORM** | MongoDB Atlas + Mongoose | `backend/config/db.js`, `models/` | Cloud document storage and Mongoose schema definitions with index management |
+| **Vector Store** | MongoDB Vector Search | `backend/services/ragService.js` | Stores 200+ chunked official policy vectors (3072 dimensions, Cosine similarity) |
+| **Text-Native Parsing** | `pdf-parse` | `backend/services/ocrEngine.js` | Fast-path text string extraction from digital PDFs without cloud API costs |
+| **Production OCR** | Google Cloud Vision API | `backend/services/ocrEngine.js` | Optical Character Recognition for scanned images (`JPG`, `PNG`, `WEBP`) and scanned PDFs |
+| **LLM & Structured AI** | Gemini 1.5 Flash | `geminiExtractionService.js`, `ragService.js` | Interprets raw OCR tokens into structured JSON fields and generates grounded policy answers |
+| **AI Orchestration** | LangChain Google GenAI | `backend/services/` | Wraps Gemini API calls and handles embedding generation (`@langchain/google-genai`) |
 
 ---
 
-## 4. Current vs. Planned Technical Architecture
+## 3. Detailed Component Breakdown & Implementation Mechanics
 
-| Dimension | Current Architecture `[IMPLEMENTED]` | Planned Architecture `[PLANNED]` |
-|---|---|---|
-| **Primary Decision Source** | Logic-Fallback Engine (due to Atlas IP whitelist limits) | Live MongoDB Atlas Vector Search RAG |
-| **Authentication** | None (Frictionless hackathon access) | Firebase Auth / Twilio OTP Login |
-| **Language Translation** | Google Translate script element hack | Bhashini AI API |
-| **Document Input** | Web Speech STT + Manual Form | Camera OCR (Tesseract.js / Google Cloud Vision) |
-| **Caching Layer** | None | Redis Cache over Gemini queries |
-| **Containerization** | Uncontainerized Node/Vite processes | Docker containers + AWS ECS / Render deployment |
+### A. RAG Vector Policy Engine
+* **Files**: [`backend/services/ragService.js`](file:///e:/nitisetu/backend/services/ragService.js), [`backend/scripts/test_rag.cjs`](file:///e:/nitisetu/backend/scripts/test_rag.cjs)
+* **How It Works**:
+  1. Official government PDFs (`PM-KISAN.pdf`, `PM-KMY.pdf`, `PM-KUSUM.pdf`) are split into searchable text chunks using `@langchain/textsplitters`.
+  2. Each chunk is converted into 3072-dimensional vector embeddings using Google GenAI Embeddings.
+  3. Vectors are stored in MongoDB Atlas under the `vector_index` search index.
+  4. When a farmer checks eligibility, the system performs a Cosine similarity search against the vector index to retrieve the top 3 matching policy chunks.
+  5. The retrieved chunks are fed to Gemini along with the farmer's parameters to generate a grounded explanation backed by verbatim legal citations.
+
+---
+
+### B. Genuine Multi-Engine OCR Pipeline
+* **Files**: [`backend/services/ocrEngine.js`](file:///e:/nitisetu/backend/services/ocrEngine.js), [`backend/services/ocrService.js`](file:///e:/nitisetu/backend/services/ocrService.js)
+* **How It Works**:
+  1. **Dual-Engine Router**:
+     - If the file is a **text-native PDF**, `pdf-parse` extracts text instantly (`ocrEngineUsed: 'Text-Native-Parser'`).
+     - If the file is a **scanned PDF or image** (`JPG`, `PNG`, `WEBP`), the binary buffer is sent to Google Cloud Vision API (`DOCUMENT_TEXT_DETECTION`).
+  2. **Document Classification**: The system analyzes raw text keywords to classify the document type (`Land Ownership Record (Jamabandi)`, `Aadhaar`, `Bank Passbook`, `Income Certificate`).
+  3. **Status Assignment**: If overall document confidence is `< 0.75` or key land parameters are unread, status becomes `Needs Review`; otherwise, `Processed`. *(Status `Verified` is strictly reserved for official government API checks).*
+
+---
+
+### C. Gemini Entity Extraction & Confidence Engine
+* **Files**: [`backend/services/geminiExtractionService.js`](file:///e:/nitisetu/backend/services/geminiExtractionService.js)
+* **How It Works**:
+  1. Takes raw text tokens from `ocrEngine.js` and sends them to Gemini 1.5 Flash with a strict JSON schema prompt.
+  2. Gemini extracts structured fields:
+     - **Land Record**: `ownerName`, `landAcres`, `khasraNumber`, `surveyNumber`, `village`, `district`, `state`
+     - **Aadhaar**: `ownerName`, `address`, `aadhaarMasked` (`XXXX-XXXX-1234`)
+     - **Bank Passbook**: `bankName`, `accountMasked` (`XXXX-XXXX-5678`), `branch`
+  3. Assigns per-field confidence scores (`fieldConfidence: { landAcres: 0.94, khasraNumber: 0.90 }`).
+  4. Automatically masks sensitive numbers (Aadhaar/Bank) and sets missing fields to `null` without fabricating data.
+
+---
+
+### D. Farmer Document Vault & Confirmation Handler
+* **Files**: [`frontend/src/ui-ux/DocumentVault.jsx`](file:///e:/nitisetu/frontend/src/ui-ux/DocumentVault.jsx), [`backend/controllers/documentController.js`](file:///e:/nitisetu/backend/controllers/documentController.js)
+* **How It Works**:
+  1. Uploaded files are saved outside public web roots in `backend/uploads/documents/` using UUID storage references.
+  2. Private streaming download route `GET /api/documents/file/:id/download` streams raw files securely.
+  3. Extracted OCR fields are rendered in the **Farmer Confirmation Card**:
+     - Displays OCR engine used, classification confidence, and per-field confidence badges.
+     - Provides interactive `[Confirm & Save Details]` and `[Edit Details]` controls.
+     - Allows single-click synchronization of extracted parameters (e.g. land size) to the farmer profile.
+
+---
+
+### E. Personalized Event-Driven Notification Engine
+* **Files**: [`backend/services/notificationService.js`](file:///e:/nitisetu/backend/services/notificationService.js), [`frontend/src/ui-ux/NotificationCenter.jsx`](file:///e:/nitisetu/frontend/src/ui-ux/NotificationCenter.jsx)
+* **How It Works**:
+  1. Generates targeted notifications based on profile state and vault cross-checks:
+     - `SCHEME_AVAILABLE`: When profile parameters qualify for a new benefit.
+     - `DOCUMENT_REQUIRED`: When mandatory scheme documents (e.g., Jamabandi) are missing from the vault.
+     - `PROFILE_MISMATCH`: Triggered when extracted OCR land size (e.g. 3.2 acres) differs from current profile input (e.g. 2.5 acres).
+     - `DOCUMENT_EXPIRING`: Triggered ONLY when a verified `expiryDate` is within 30 days of expiration.
+  2. In-App Notification Center UI renders unread badge counts, priority filters (`high`, `medium`), read/unread toggles, and direct contextual action links.
+
+---
+
+### F. ProofCard & Document Vault Synchronization
+* **Files**: [`frontend/src/ui-ux/ProofCard.jsx`](file:///e:/nitisetu/frontend/src/ui-ux/ProofCard.jsx)
+* **How It Works**:
+  1. Evaluates required documents against the farmer's active Document Vault.
+  2. Displays `✓ Available in Vault` for matching document types.
+  3. Displays `⚠ Document Required` with a direct **Upload to Vault** action button for missing documents.
+
+---
+
+## 4. End-to-End Execution Data Lifecycle
+
+```
+[ Farmer Input / Voice ]
+           │
+           v
+  POST /api/check ───► [ Scheme Discovery Engine ]
+           │                       │
+           │                       ▼
+           │             (MongoDB Atlas RAG)
+           │                       │
+           v                       v
+[ Proof Card Output ] ◄── [ Verbatim Legal Evidence ]
+           │
+           ├─── Cross-checks required documents against Vault
+           │
+           v
+[ Upload Jamabandi PDF / Image ] ───► POST /api/documents/upload
+                                                   │
+                                                   v
+                                         [ Dual-Path OCR Engine ]
+                                       (pdf-parse / Cloud Vision)
+                                                   │
+                                                   v
+                                      [ Gemini Entity Extractor ]
+                                                   │
+                                                   v
+                                      [ Farmer Confirmation UI ]
+                                       ([Confirm] / [Edit])
+                                                   │
+                                                   v
+                                      [ Profile Mismatch Alert ]
+                                                   │
+                                                   v
+                                      [ Notification Center Bell ]
+```
+
+---
+
+## 5. Security & Privacy Architecture
+
+1. **PII Data Minimization**: Aadhaar numbers are masked (`XXXX-XXXX-1234`) across frontend views, backend payloads, and database records.
+2. **Private File Access**: Uploaded binaries are saved in non-static directories and served exclusively through authenticated stream handlers (`GET /api/documents/file/:id/download`).
+3. **Log Hygiene**: Raw OCR text streams and sensitive user input payloads are scrubbed before logging.
+4. **File Validation**: Strict whitelist validation (`.pdf`, `.png`, `.jpg`, `.jpeg`, `.webp`) and a hard 5MB payload ceiling per upload.
