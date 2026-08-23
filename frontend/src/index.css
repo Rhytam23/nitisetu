@@ -1,108 +1,123 @@
 @import "tailwindcss";
 
-@theme {
-  --color-brand-50: #f0fdfa;
-  --color-brand-100: #ccfbf1;
-  --color-brand-200: #99f6e4;
-  --color-brand-300: #5eead4;
-  --color-brand-400: #2dd4bf;
-  --color-brand-500: #14b8a6;
-  --color-brand-600: #0d9488;
-  --color-brand-700: #0f766e;
-  --color-brand-800: #115e59;
-  --color-brand-900: #134e4a;
-  --color-brand-950: #042f2e;
-  
-  --color-accent-50: #fefce8;
-  --color-accent-500: #eab308;
-  --color-accent-600: #ca8a04;
-
-  /* Fluid Typography Scales */
-  --text-fluid-hero: clamp(3rem, 10vw, 8rem);
-  --text-fluid-h2: clamp(2rem, 5vw, 4rem);
-  --text-fluid-body: clamp(0.9rem, 1.25vw, 1.125rem);
-}
-
 @layer base {
   :root {
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #202622;
+    background-color: #F8F5EC;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: #F8F5EC;
+    color: #202622;
+    font-family: 'Inter', sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Poppins', sans-serif;
+    color: #202622;
+    letter-spacing: -0.01em;
   }
 }
 
 @layer utilities {
-  .glass-card {
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  .bg-warm-cream {
+    background-color: #F8F5EC;
+  }
+  .bg-card-white {
+    background-color: #FFFFFF;
+  }
+  .bg-forest-primary {
+    background-color: #174A32;
+  }
+  .bg-forest-secondary {
+    background-color: #2F6B4F;
+  }
+  .text-forest-primary {
+    color: #174A32;
+  }
+  .text-forest-secondary {
+    color: #2F6B4F;
+  }
+  .text-charcoal {
+    color: #202622;
+  }
+  .text-muted-govt {
+    color: #66706A;
+  }
+  .border-govt {
+    border-color: #DDE3DC;
   }
 
-  .glass-header {
-    background: rgba(11, 14, 20, 0.6);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  /* Status Colors */
+  .badge-eligible {
+    background-color: #E8F5EC;
+    color: #287A4D;
+    border: 1px solid #C6E7D2;
   }
 
-  .content-container {
-    max-width: 1440px;
-    margin-left: auto;
-    margin-right: auto;
-    width: 100%;
+  .badge-needs-verif {
+    background-color: #FFF5D9;
+    color: #B7791F;
+    border: 1px solid #F6E3B5;
   }
 
-  .animate-reveal {
-    animation: reveal 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  .badge-ineligible {
+    background-color: #FCECEC;
+    color: #B54747;
+    border: 1px solid #F5C6C6;
   }
 
-  @keyframes reveal {
-    from {
-      opacity: 0;
-      transform: translateY(20px) scale(0.95);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
+  /* Buttons */
+  .btn-forest-primary {
+    background-color: #174A32;
+    color: #FFFFFF;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    transition: background-color 0.2s ease;
+  }
+  .btn-forest-primary:hover {
+    background-color: #2F6B4F;
   }
 
-  .animate-fade-in-up {
-    animation: fadeInUp 0.6s ease-out forwards;
+  .btn-forest-secondary {
+    background-color: #FFFFFF;
+    color: #2F6B4F;
+    border: 1.5px solid #2F6B4F;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    transition: all 0.2s ease;
   }
-  
-  .animate-shake {
-    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
-  }
-  
-  .animate-scale-in {
-    animation: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-  }
-
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  .btn-forest-secondary:hover {
+    background-color: #2F6B4F;
+    color: #FFFFFF;
   }
 
-  @keyframes shake {
-    10%, 90% { transform: translate3d(-1px, 0, 0); }
-    20%, 80% { transform: translate3d(2px, 0, 0); }
-    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-    40%, 60% { transform: translate3d(4px, 0, 0); }
+  /* Government Form Control Inputs */
+  .input-govt {
+    background-color: #FFFFFF;
+    border: 1px solid #DDE3DC;
+    color: #202622;
+    font-family: 'Inter', sans-serif;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 14px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .input-govt:focus {
+    outline: none;
+    border-color: #2F6B4F;
+    box-shadow: 0 0 0 3px rgba(47, 107, 79, 0.12);
   }
 
-  @keyframes scaleIn {
-    from {
-      opacity: 0;
-      transform: scale(0.95);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
+  .card-govt {
+    background-color: #FFFFFF;
+    border: 1px solid #DDE3DC;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(32, 38, 34, 0.04);
   }
 }

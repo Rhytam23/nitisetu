@@ -66,77 +66,79 @@ const ProofCard = ({ result, schemeName, selectedLanguage, farmerId = 'demo_farm
   };
 
   return (
-    <div className="mt-8 max-w-3xl w-full mx-auto rounded-2xl border border-slate-800 bg-slate-900 overflow-hidden shadow-lg">
+    <div className="mt-8 max-w-4xl w-full mx-auto rounded-xl border border-[#DDE3DC] bg-white overflow-hidden shadow-xs font-sans">
       
       {/* Header Verdict Phase */}
-      <div className={`p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b ${isEligible ? 'bg-emerald-950/30 border-emerald-800/40' : 'bg-amber-950/30 border-amber-800/40'}`}>
+      <div className={`p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b ${isEligible ? 'bg-[#E8F5EC] border-[#C6E7D2]' : 'bg-[#FFF5D9] border-[#F6E3B5]'}`}>
         <div className="flex items-center gap-3.5">
           {isEligible ? (
-            <CheckCircle className="text-emerald-400 w-9 h-9 shrink-0" />
+            <CheckCircle className="text-[#287A4D] w-8 h-8 shrink-0" />
           ) : (
-            <XCircle className="text-amber-400 w-9 h-9 shrink-0" />
+            <XCircle className="text-[#B7791F] w-8 h-8 shrink-0" />
           )}
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-2xl font-bold text-white tracking-tight">{result.status}</h3>
-              <span className="text-[10px] font-semibold tracking-wider uppercase px-2.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
+              <h3 className={`text-2xl font-bold font-poppins ${isEligible ? 'text-[#287A4D]' : 'text-[#B7791F]'}`}>
+                {isEligible ? 'Likely Eligible' : 'Needs Verification'}
+              </h3>
+              <span className="text-[11px] font-semibold tracking-wider uppercase px-2.5 py-0.5 rounded bg-white text-[#202622] border border-[#DDE3DC]">
                 Policy Verified
               </span>
             </div>
-            <p className="text-xs text-slate-400 font-medium mt-0.5">{schemeName || 'Scheme'} Eligibility Assessment Verdict</p>
+            <p className="text-xs text-[#66706A] font-medium mt-0.5">{schemeName || 'Scheme'} Eligibility Assessment Verdict</p>
           </div>
         </div>
 
         <button 
           onClick={playTTS} 
-          className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold border bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-700 transition-colors w-full sm:w-auto"
+          className="flex items-center justify-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold border bg-white text-[#2F6B4F] border-[#2F6B4F] hover:bg-[#F8F5EC] transition-colors w-full sm:w-auto"
         >
-          {isPlaying ? <Volume2 size={15} className="animate-pulse text-teal-400" /> : <SquarePlay size={15} className="text-teal-400" />}
+          {isPlaying ? <Volume2 size={15} className="animate-pulse text-[#174A32]" /> : <SquarePlay size={15} className="text-[#174A32]" />}
           {isPlaying ? 'Stop Audio' : 'Listen Audio Explanation'}
         </button>
       </div>
 
       <div className="p-6 sm:p-8 space-y-7">
         
-        {/* Localized AI Explanation */}
+        {/* Why You're Eligible / Explanation */}
         <div className="space-y-2">
-          <h4 className="text-xs font-bold text-teal-400 uppercase tracking-wider flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-teal-400"></span> AI Explanation (Localized)
+          <h4 className="text-xs font-bold text-[#2F6B4F] uppercase tracking-wider font-poppins">
+            Eligibility Explanation
           </h4>
-          <p className="text-white text-base font-normal leading-relaxed bg-slate-950 p-4 rounded-xl border border-slate-800/80">
+          <p className="text-[#202622] text-sm leading-relaxed bg-[#F8F5EC] p-4 rounded-lg border border-[#DDE3DC]">
             {result.reasoning}
           </p>
         </div>
 
         {/* Verbatim Policy Evidence Quote */}
-        <div className="bg-slate-950 rounded-xl p-5 border border-slate-800 space-y-3">
+        <div className="bg-[#F8F5EC] rounded-lg p-5 border border-[#DDE3DC] space-y-3">
           <div className="flex items-center justify-between">
-            <h4 className="flex items-center gap-2 text-xs font-bold text-emerald-400 uppercase tracking-wider">
-              <Bookmark size={14} className="text-emerald-400" /> Verbatim Policy Evidence (Original Text)
+            <h4 className="flex items-center gap-2 text-xs font-bold text-[#174A32] uppercase tracking-wider font-poppins">
+              <Bookmark size={15} className="text-[#174A32]" /> Official Policy Evidence (Original Text)
             </h4>
-            <span className="text-[9px] font-medium text-slate-400 bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
+            <span className="text-[10px] font-semibold text-[#66706A] bg-white px-2 py-0.5 rounded border border-[#DDE3DC]">
               Untranslated Legal Quote
             </span>
           </div>
-          <blockquote className="border-l-2 border-emerald-500 pl-4 py-2 text-slate-200 font-normal italic text-sm leading-relaxed">
+          <blockquote className="border-l-3 border-[#174A32] pl-4 py-2 text-[#202622] font-normal italic text-sm leading-relaxed">
             "{result.document_proof}"
           </blockquote>
-          <p className="text-xs text-slate-400 flex items-center gap-1.5 font-medium pt-1">
-            <FileText size={14} className="text-teal-400" /> Source Citation: <strong className="text-slate-200 font-semibold">{result.citation}</strong>
+          <p className="text-xs text-[#66706A] flex items-center gap-1.5 font-medium pt-1">
+            <FileText size={14} className="text-[#174A32]" /> Source Citation: <strong className="text-[#202622] font-semibold">{result.citation}</strong>
           </p>
         </div>
 
         {/* Application Guidance & Pathways */}
         {guidance.application_pathway && (
-          <div className="space-y-5 pt-4 border-t border-slate-800">
+          <div className="space-y-5 pt-4 border-t border-[#DDE3DC]">
             <div>
-              <h4 className="flex items-center gap-1.5 text-xs font-bold text-teal-400 uppercase tracking-wider mb-3">
-                <ChevronRight size={16} className="text-teal-400" /> Official Application Steps
+              <h4 className="flex items-center gap-1.5 text-xs font-bold text-[#2F6B4F] uppercase tracking-wider mb-3 font-poppins">
+                <ChevronRight size={16} className="text-[#2F6B4F]" /> Official Application Steps
               </h4>
               <div className="space-y-2">
                 {guidance.application_pathway.map((step, idx) => (
-                  <div key={idx} className="flex items-start gap-3 bg-slate-950 p-3 rounded-lg border border-slate-800/80 text-xs text-slate-300 font-normal">
-                    <span className="w-5 h-5 rounded bg-teal-500/20 text-teal-300 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5 border border-teal-500/30">
+                  <div key={idx} className="flex items-start gap-3 bg-[#F8F5EC] p-3 rounded-lg border border-[#DDE3DC] text-xs text-[#202622]">
+                    <span className="w-5 h-5 rounded bg-[#174A32] text-white font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">
                       {idx + 1}
                     </span>
                     <span>{step}</span>
@@ -149,11 +151,11 @@ const ProofCard = ({ result, schemeName, selectedLanguage, farmerId = 'demo_farm
             {result.required_documents && result.required_documents.length > 0 && (
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <h4 className="flex items-center gap-1.5 text-xs font-bold text-slate-300 uppercase tracking-wider">
-                    <CheckCircle size={14} className="text-teal-400" /> Required Documents & Vault Cross-Check
+                  <h4 className="flex items-center gap-1.5 text-xs font-bold text-[#202622] uppercase tracking-wider font-poppins">
+                    <CheckCircle size={15} className="text-[#2F6B4F]" /> Required Documents Checklist
                   </h4>
-                  <span className="text-[10px] text-teal-400 font-medium flex items-center gap-1">
-                    <ShieldCheck size={12} /> Document Vault Sync
+                  <span className="text-[11px] text-[#2F6B4F] font-semibold flex items-center gap-1">
+                    <ShieldCheck size={13} /> Document Locker Sync
                   </span>
                 </div>
 
@@ -162,34 +164,34 @@ const ProofCard = ({ result, schemeName, selectedLanguage, farmerId = 'demo_farm
                     const docInfo = guidance.document_acquisition_guide?.[doc] || {};
                     const inVault = isDocumentInVault(doc);
                     return (
-                      <div key={idx} className="bg-slate-950 p-3.5 rounded-xl border border-slate-800/80 space-y-2">
+                      <div key={idx} className="bg-[#F8F5EC] p-3.5 rounded-lg border border-[#DDE3DC] space-y-2">
                         <div className="flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-2 font-semibold text-white text-xs">
-                            <CheckCircle size={14} className="text-emerald-400 shrink-0" />
+                          <div className="flex items-center gap-2 font-semibold text-[#202622] text-xs">
+                            <CheckCircle size={14} className="text-[#287A4D] shrink-0" />
                             <span>{doc}</span>
                           </div>
                           
                           {inVault ? (
-                            <span className="px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 text-[9px] font-bold">
-                              ✓ Available in Vault
+                            <span className="px-2 py-0.5 rounded bg-[#E8F5EC] text-[#287A4D] border border-[#C6E7D2] text-[10px] font-semibold">
+                              Available in Locker
                             </span>
                           ) : (
                             <button
                               onClick={onNavigateToVault}
-                              className="px-2 py-0.5 rounded bg-amber-950 hover:bg-amber-900 text-amber-300 border border-amber-800 text-[9px] font-bold flex items-center gap-1"
+                              className="px-2 py-0.5 rounded bg-[#FFF5D9] hover:bg-[#F6E3B5] text-[#B7791F] border border-[#F6E3B5] text-[10px] font-semibold flex items-center gap-1"
                             >
-                              <Upload size={10} /> Upload to Vault
+                              <Upload size={10} /> Upload
                             </button>
                           )}
                         </div>
 
                         {docInfo.why_needed && (
-                          <p className="text-[11px] text-slate-400 leading-snug"><strong className="text-slate-500">Why:</strong> {docInfo.why_needed}</p>
+                          <p className="text-[11px] text-[#66706A] leading-snug"><strong className="text-[#202622]">Why:</strong> {docInfo.why_needed}</p>
                         )}
                         {docInfo.where_to_obtain && (
-                          <p className="text-[11px] text-slate-400 leading-snug flex items-start gap-1">
-                            <MapPin size={12} className="text-teal-400 shrink-0 mt-0.5" />
-                            <span><strong className="text-teal-300">Where:</strong> {docInfo.where_to_obtain}</span>
+                          <p className="text-[11px] text-[#66706A] leading-snug flex items-start gap-1">
+                            <MapPin size={12} className="text-[#2F6B4F] shrink-0 mt-0.5" />
+                            <span><strong className="text-[#202622]">Where:</strong> {docInfo.where_to_obtain}</span>
                           </p>
                         )}
                       </div>
@@ -203,20 +205,20 @@ const ProofCard = ({ result, schemeName, selectedLanguage, farmerId = 'demo_farm
 
         {/* Discovered Schemes Matrix */}
         {discoveredSchemes.length > 0 && (
-          <div className="pt-5 border-t border-slate-800 space-y-3">
-            <h4 className="flex items-center gap-1.5 text-xs font-bold text-slate-300 uppercase tracking-wider">
-              <Layers size={14} className="text-teal-400" /> Discovered Schemes for Your Profile
+          <div className="pt-5 border-t border-[#DDE3DC] space-y-3">
+            <h4 className="flex items-center gap-1.5 text-xs font-bold text-[#202622] uppercase tracking-wider font-poppins">
+              <Layers size={15} className="text-[#2F6B4F]" /> Discovered Schemes for Your Profile
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {discoveredSchemes.map((s, idx) => (
-                <div key={idx} className={`p-3.5 rounded-xl border ${s.recommended ? 'bg-teal-950/20 border-teal-800/40' : 'bg-slate-950 border-slate-800'} space-y-1.5`}>
+                <div key={idx} className="p-3.5 rounded-lg border bg-[#F8F5EC] border-[#DDE3DC] space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-white text-xs">{s.id}</span>
-                    <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded ${s.recommended ? 'bg-emerald-950 text-emerald-300 border border-emerald-800' : 'bg-slate-800 text-slate-400'}`}>
-                      {s.recommended ? 'Recommended' : 'Ineligible'}
+                    <span className="font-bold text-[#202622] text-xs">{s.id}</span>
+                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${s.recommended ? 'bg-[#E8F5EC] text-[#287A4D] border border-[#C6E7D2]' : 'bg-white text-[#66706A] border border-[#DDE3DC]'}`}>
+                      {s.recommended ? 'Likely Eligible' : 'Needs Verification'}
                     </span>
                   </div>
-                  <p className="text-[11px] text-slate-400 leading-tight">{s.purpose}</p>
+                  <p className="text-[11px] text-[#66706A] leading-tight">{s.purpose}</p>
                 </div>
               ))}
             </div>
@@ -224,16 +226,16 @@ const ProofCard = ({ result, schemeName, selectedLanguage, farmerId = 'demo_farm
         )}
 
         {/* Guidance Footer Notice */}
-        <div className="pt-4 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-slate-400 text-xs">
+        <div className="pt-4 border-t border-[#DDE3DC] flex flex-col sm:flex-row items-center justify-between gap-3 text-[#66706A] text-xs">
           <p className="flex items-center gap-1.5 text-[11px]">
-            <HelpCircle size={13} className="text-teal-400" />
+            <HelpCircle size={13} className="text-[#2F6B4F]" />
             Application guidance provided for informational assistance.
           </p>
           <a 
             href="https://pmkisan.gov.in" 
             target="_blank" 
             rel="noreferrer"
-            className="flex items-center gap-1 text-teal-400 font-semibold hover:underline text-xs"
+            className="flex items-center gap-1 text-[#2F6B4F] font-semibold hover:underline text-xs"
           >
             Official Government Portal <ExternalLink size={12} />
           </a>

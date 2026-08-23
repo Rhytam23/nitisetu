@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Loader2, ArrowLeft, ShieldCheck, FolderLock, Target, LogIn, LogOut, User, LayoutDashboard, Shield } from 'lucide-react';
+import { Loader2, ArrowLeft, ShieldCheck, FolderLock, Target, LogIn, LogOut, User, LayoutDashboard, Shield, Bell } from 'lucide-react';
 import LandingPage from './ui-ux/LandingPage';
 import ProfileForm from './ui-ux/ProfileForm';
 import ProofCard from './ui-ux/ProofCard';
@@ -127,7 +127,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col font-sans selection:bg-teal-500/30 selection:text-teal-200 relative text-slate-200">
+    <div className="min-h-screen bg-[#F8F5EC] flex flex-col font-sans text-[#202622]">
       
       {/* Auth Modal */}
       <AuthModal
@@ -136,43 +136,46 @@ function App() {
         onAuthSuccess={handleAuthSuccess}
       />
 
-      {/* Top Header Navigation */}
-      <header className="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+      {/* Top Header Navigation (Government Forest Green Header) */}
+      <header className="bg-[#174A32] text-white sticky top-0 z-50 shadow-sm border-b border-[#0F3523]">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
           
           <div className="flex items-center gap-3">
             <button 
               onClick={() => setView('landing')}
-              className="p-1.5 hover:bg-slate-800 rounded-lg transition-colors text-slate-400 hover:text-white"
+              className="p-1.5 hover:bg-[#2F6B4F] rounded-lg transition-colors text-white/80 hover:text-white"
+              title="Return to Home"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
-            <img src="/logo.jpg" alt="Niti-Setu Logo" className="w-8 h-8 rounded-lg object-cover border border-slate-700" />
+            <div className="w-8 h-8 rounded-lg bg-white/10 border border-white/20 flex items-center justify-center font-bold text-white text-base">
+              🏛️
+            </div>
             <div>
-              <h1 className="text-xl font-bold tracking-tight text-white">Niti-Setu</h1>
-              <p className="text-teal-400 text-[10px] font-semibold uppercase tracking-wider hidden sm:block">Government Scheme Access</p>
+              <h1 className="text-xl font-bold tracking-tight text-white font-poppins">Niti-Setu</h1>
+              <p className="text-[#E9B949] text-[10px] font-semibold uppercase tracking-wider hidden sm:block">Citizen Benefits Platform</p>
             </div>
           </div>
 
           {/* Navigation Controls & Role Badges */}
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-4">
             
             {/* View Switcher Tabs */}
-            <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs font-semibold">
+            <nav className="flex bg-[#0F3523] p-1 rounded-lg border border-[#2F6B4F] text-xs font-medium">
               {user?.role === 'ADMIN' ? (
                 <button
                   onClick={() => setView('admin-dashboard')}
-                  className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
-                    view === 'admin-dashboard' ? 'bg-teal-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'
+                  className={`px-3 py-1.5 rounded-md flex items-center gap-1.5 transition-colors ${
+                    view === 'admin-dashboard' ? 'bg-[#2F6B4F] text-white font-semibold' : 'text-white/80 hover:text-white'
                   }`}
                 >
-                  <Shield size={14} /> Admin
+                  <Shield size={14} /> Overview
                 </button>
               ) : (
                 <button
                   onClick={() => setView('dashboard')}
-                  className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
-                    view === 'dashboard' ? 'bg-teal-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'
+                  className={`px-3 py-1.5 rounded-md flex items-center gap-1.5 transition-colors ${
+                    view === 'dashboard' ? 'bg-[#2F6B4F] text-white font-semibold' : 'text-white/80 hover:text-white'
                   }`}
                 >
                   <LayoutDashboard size={14} /> Dashboard
@@ -181,21 +184,21 @@ function App() {
 
               <button
                 onClick={() => setView('tool')}
-                className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
-                  view === 'tool' ? 'bg-teal-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'
+                className={`px-3 py-1.5 rounded-md flex items-center gap-1.5 transition-colors ${
+                  view === 'tool' ? 'bg-[#2F6B4F] text-white font-semibold' : 'text-white/80 hover:text-white'
                 }`}
               >
-                <Target size={14} /> Evaluation
+                <Target size={14} /> Benefits Check
               </button>
               <button
                 onClick={() => setView('vault')}
-                className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
-                  view === 'vault' ? 'bg-teal-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'
+                className={`px-3 py-1.5 rounded-md flex items-center gap-1.5 transition-colors ${
+                  view === 'vault' ? 'bg-[#2F6B4F] text-white font-semibold' : 'text-white/80 hover:text-white'
                 }`}
               >
-                <FolderLock size={14} /> Vault
+                <FolderLock size={14} /> Documents
               </button>
-            </div>
+            </nav>
 
             <NotificationCenter farmerId={farmerId} onNavigate={(route) => {
               if (route === '/vault') setView('vault');
@@ -206,15 +209,15 @@ function App() {
 
             {/* Auth Button / User Profile Control */}
             {user ? (
-              <div className="flex items-center gap-2 border-l border-slate-800 pl-2">
+              <div className="flex items-center gap-2 border-l border-[#2F6B4F] pl-3">
                 <div className="hidden sm:block text-right">
-                  <p className="text-xs font-bold text-white leading-tight">{user.name}</p>
-                  <span className="text-[9px] text-teal-400 uppercase font-semibold">{user.role}</span>
+                  <p className="text-xs font-semibold text-white leading-tight">{user.name}</p>
+                  <span className="text-[10px] text-[#E9B949] uppercase font-bold">{user.role}</span>
                 </div>
                 <button
                   onClick={handleLogout}
                   title="Log Out"
-                  className="p-2 bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-red-400 rounded-xl border border-slate-800 transition-colors"
+                  className="p-1.5 bg-[#0F3523] hover:bg-[#2F6B4F] text-white/80 hover:text-white rounded-lg border border-[#2F6B4F] transition-colors"
                 >
                   <LogOut size={16} />
                 </button>
@@ -222,7 +225,7 @@ function App() {
             ) : (
               <button
                 onClick={() => setShowAuthModal(true)}
-                className="px-3 py-1.5 bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold rounded-xl text-xs flex items-center gap-1.5 transition-colors shadow-sm"
+                className="px-3.5 py-1.5 bg-[#E9B949] hover:bg-[#D9A838] text-[#174A32] font-semibold rounded-lg text-xs flex items-center gap-1.5 transition-colors shadow-sm"
               >
                 <LogIn size={14} /> Sign In
               </button>
@@ -234,7 +237,7 @@ function App() {
       </header>
 
       {/* Main Dashboard Views */}
-      <main className="flex-grow max-w-4xl mx-auto w-full px-4 sm:px-6 py-8 space-y-8 relative z-10">
+      <main className="flex-grow max-w-5xl mx-auto w-full px-4 sm:px-6 py-8 space-y-8">
         
         {view === 'admin-dashboard' ? (
           <AdminDashboard user={user} token={token} />
@@ -249,14 +252,14 @@ function App() {
           />
         ) : (
           <>
-            <section>
-              <div className="text-center mb-8">
-                <span className="px-3 py-1 bg-teal-500/10 text-teal-300 border border-teal-500/20 rounded-full text-xs font-semibold uppercase tracking-wider mb-3 inline-block">
-                  Step 1: Farmer Parameters
+            <section className="space-y-6">
+              <div className="bg-white border border-[#DDE3DC] rounded-xl p-6 sm:p-8 space-y-3 text-left">
+                <span className="inline-block px-2.5 py-1 bg-[#F8F5EC] text-[#2F6B4F] border border-[#DDE3DC] text-xs font-semibold rounded-md">
+                  Government Scheme Verification
                 </span>
-                <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">Evaluate Scheme Eligibility</h2>
-                <p className="text-slate-400 mt-2 max-w-xl mx-auto font-normal text-sm">
-                  Provide your landholding parameters below. The system evaluates your details against active government operational guidelines in real-time.
+                <h2 className="text-2xl sm:text-3xl font-bold text-[#202622] font-poppins">Find schemes you may qualify for</h2>
+                <p className="text-[#66706A] text-sm max-w-2xl font-normal">
+                  Provide your location and landholding details below. The platform checks active government operational guidelines to explain your eligibility and exact next steps.
                 </p>
               </div>
               
@@ -265,34 +268,26 @@ function App() {
 
             {/* Loading State */}
             {loading && (
-              <div className="flex flex-col items-center justify-center p-10 bg-slate-900 rounded-2xl border border-slate-800 text-center space-y-4">
-                <Loader2 className="w-10 h-10 text-teal-400 animate-spin" />
+              <div className="flex flex-col items-center justify-center p-10 bg-white rounded-xl border border-[#DDE3DC] text-center space-y-4">
+                <Loader2 className="w-9 h-9 text-[#174A32] animate-spin" />
                 <div>
-                  <h3 className="text-lg font-bold text-white">Searching Government Policy Knowledge Base...</h3>
-                  <p className="text-slate-400 text-xs font-normal mt-1">Retrieving vector embeddings from MongoDB Atlas and verifying legal guidelines</p>
+                  <h3 className="text-base font-bold text-[#202622] font-poppins">Checking Official Guidelines...</h3>
+                  <p className="text-[#66706A] text-xs mt-1">Retrieving official policy evidence for your landholding profile</p>
                 </div>
               </div>
             )}
 
             {/* Error State */}
             {error && (
-              <div className="bg-red-950/40 border border-red-800/60 p-5 rounded-2xl">
-                <div className="flex items-center gap-2 text-red-400 font-bold mb-1 text-xs uppercase tracking-wider">
-                   <span className="w-2 h-2 bg-red-400 rounded-full"></span>
-                   System Notice
-                </div>
-                <p className="text-red-200 text-sm font-medium">{error}</p>
+              <div className="bg-[#FCECEC] border border-[#F5C6C6] p-5 rounded-xl text-[#B54747] space-y-1">
+                <p className="font-bold text-xs uppercase tracking-wider">System Notice</p>
+                <p className="text-sm font-normal">{error}</p>
               </div>
             )}
 
             {/* Result Card */}
             {(!loading && result) && (
                <section className="scroll-mt-20" id="result-section">
-                  <div className="text-center mb-6">
-                    <span className="px-3 py-1 bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 rounded-full text-xs font-semibold uppercase tracking-wider mb-2 inline-block">
-                      Step 2: Verification Verdict
-                    </span>
-                 </div>
                  <ProofCard 
                    result={result} 
                    schemeName={currentScheme} 
@@ -307,10 +302,10 @@ function App() {
       </main>
 
       {/* Footer */}
-      <footer className="py-8 border-t border-slate-800 mt-12 bg-slate-900/60 text-slate-500 text-xs text-center">
+      <footer className="py-6 border-t border-[#DDE3DC] bg-white text-[#66706A] text-xs text-center mt-12">
         <div className="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p>© 2026 Niti-Setu Scheme Access Portal</p>
-          <p className="text-slate-400 font-medium">Official Policy Guidelines: PM-KISAN | PM-KMY | PM-KUSUM</p>
+          <p>© 2026 Niti-Setu — Citizen Benefits & Scheme Verification Platform</p>
+          <p className="font-medium text-[#2F6B4F]">Official Guidelines: PM-KISAN | PM-KMY | PM-KUSUM</p>
         </div>
       </footer>
     </div>

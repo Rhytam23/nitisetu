@@ -68,12 +68,12 @@ const NotificationCenter = ({ farmerId = 'demo_farmer_1', onNavigate }) => {
   const getPriorityBadge = (priority) => {
     switch (priority) {
       case 'high':
-        return <span className="px-2 py-0.5 rounded bg-red-950 text-red-300 border border-red-800 text-[9px] font-bold uppercase">High</span>;
+        return <span className="px-2 py-0.5 rounded bg-[#FCECEC] text-[#B54747] border border-[#F5C6C6] text-[9px] font-bold uppercase">High</span>;
       case 'medium':
-        return <span className="px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800 text-[9px] font-bold uppercase">Medium</span>;
+        return <span className="px-2 py-0.5 rounded bg-[#FFF5D9] text-[#B7791F] border border-[#F6E3B5] text-[9px] font-bold uppercase">Medium</span>;
       case 'low':
       default:
-        return <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700 text-[9px] font-bold uppercase">Low</span>;
+        return <span className="px-2 py-0.5 rounded bg-[#F8F5EC] text-[#66706A] border border-[#DDE3DC] text-[9px] font-bold uppercase">Low</span>;
     }
   };
 
@@ -82,12 +82,12 @@ const NotificationCenter = ({ farmerId = 'demo_farmer_1', onNavigate }) => {
       {/* Trigger Bell Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800 transition-colors"
-        title="Personalized Farmer Notifications"
+        className="relative p-2 rounded-lg bg-[#0F3523] border border-[#2F6B4F] text-white/90 hover:text-white transition-colors"
+        title="Personalized Notifications"
       >
-        <Bell size={18} />
+        <Bell size={17} />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-teal-500 text-slate-950 text-[10px] font-black flex items-center justify-center border border-slate-950 shadow-sm">
+          <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#E9B949] text-[#174A32] text-[10px] font-bold flex items-center justify-center border border-[#174A32] shadow-xs">
             {unreadCount}
           </span>
         )}
@@ -95,14 +95,14 @@ const NotificationCenter = ({ farmerId = 'demo_farmer_1', onNavigate }) => {
 
       {/* Notification Drawer / Panel */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl z-50 overflow-hidden space-y-3">
+        <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white border border-[#DDE3DC] rounded-xl shadow-lg z-50 overflow-hidden space-y-3 font-sans">
           
           {/* Panel Header */}
-          <div className="p-4 bg-slate-950 border-b border-slate-800 flex items-center justify-between">
+          <div className="p-4 bg-[#F8F5EC] border-b border-[#DDE3DC] flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <h3 className="font-bold text-white text-sm">Notifications</h3>
+              <h3 className="font-bold text-[#202622] text-sm font-poppins">Notifications</h3>
               {unreadCount > 0 && (
-                <span className="px-2 py-0.5 bg-teal-500/10 text-teal-300 border border-teal-500/20 text-[10px] font-bold rounded-full">
+                <span className="px-2 py-0.5 bg-[#E8F5EC] text-[#287A4D] border border-[#C6E7D2] text-[10px] font-semibold rounded-full">
                   {unreadCount} Unread
                 </span>
               )}
@@ -112,14 +112,14 @@ const NotificationCenter = ({ farmerId = 'demo_farmer_1', onNavigate }) => {
               {unreadCount > 0 && (
                 <button
                   onClick={handleMarkAllRead}
-                  className="text-[10px] font-bold text-teal-400 hover:underline flex items-center gap-1"
+                  className="text-[10px] font-semibold text-[#2F6B4F] hover:underline flex items-center gap-1"
                 >
                   <CheckCheck size={12} /> Mark All Read
                 </button>
               )}
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-1 text-slate-400 hover:text-white rounded hover:bg-slate-800 transition-colors"
+                className="p-1 text-[#66706A] hover:text-[#202622] rounded hover:bg-[#DDE3DC]/40 transition-colors"
               >
                 <X size={16} />
               </button>
@@ -127,59 +127,59 @@ const NotificationCenter = ({ farmerId = 'demo_farmer_1', onNavigate }) => {
           </div>
 
           {/* Filter Categories */}
-          <div className="px-4 flex items-center gap-1 border-b border-slate-800/80 pb-2 text-[11px] font-semibold">
+          <div className="px-4 flex items-center gap-1 border-b border-[#DDE3DC] pb-2 text-[11px] font-semibold">
             <button
               onClick={() => setFilter('ALL')}
-              className={`px-2.5 py-1 rounded-lg transition-colors ${filter === 'ALL' ? 'bg-teal-500/10 text-teal-300 border border-teal-500/20' : 'text-slate-400 hover:text-white'}`}
+              className={`px-2.5 py-1 rounded-md transition-colors ${filter === 'ALL' ? 'bg-[#174A32] text-white' : 'text-[#66706A] hover:text-[#202622]'}`}
             >
               All ({notifications.length})
             </button>
             <button
               onClick={() => setFilter('UNREAD')}
-              className={`px-2.5 py-1 rounded-lg transition-colors ${filter === 'UNREAD' ? 'bg-teal-500/10 text-teal-300 border border-teal-500/20' : 'text-slate-400 hover:text-white'}`}
+              className={`px-2.5 py-1 rounded-md transition-colors ${filter === 'UNREAD' ? 'bg-[#174A32] text-white' : 'text-[#66706A] hover:text-[#202622]'}`}
             >
               Unread
             </button>
             <button
               onClick={() => setFilter('HIGH')}
-              className={`px-2.5 py-1 rounded-lg transition-colors ${filter === 'HIGH' ? 'bg-teal-500/10 text-teal-300 border border-teal-500/20' : 'text-slate-400 hover:text-white'}`}
+              className={`px-2.5 py-1 rounded-md transition-colors ${filter === 'HIGH' ? 'bg-[#174A32] text-white' : 'text-[#66706A] hover:text-[#202622]'}`}
             >
               High Priority
             </button>
           </div>
 
           {/* Notification List */}
-          <div className="max-h-80 overflow-y-auto px-4 pb-4 space-y-2.5">
+          <div className="max-h-80 overflow-y-auto px-4 pb-4 space-y-2">
             {loading ? (
-              <p className="text-xs text-slate-500 italic py-4 text-center">Loading notifications...</p>
+              <p className="text-xs text-[#66706A] italic py-4 text-center">Loading notifications...</p>
             ) : filteredNotifications.length === 0 ? (
-              <div className="py-6 text-center text-slate-500 text-xs space-y-1">
-                <Info size={20} className="mx-auto text-slate-600" />
+              <div className="py-6 text-center text-[#66706A] text-xs space-y-1">
+                <Info size={20} className="mx-auto text-[#66706A]" />
                 <p>No notifications matching filter.</p>
               </div>
             ) : (
               filteredNotifications.map((notif) => (
                 <div
                   key={notif._id}
-                  className={`p-3 rounded-xl border transition-colors ${
-                    notif.readAt ? 'bg-slate-950/40 border-slate-800/60 opacity-80' : 'bg-slate-950 border-slate-800'
+                  className={`p-3 rounded-lg border transition-colors ${
+                    notif.readAt ? 'bg-[#F8F5EC]/60 border-[#DDE3DC] opacity-75' : 'bg-[#F8F5EC] border-[#DDE3DC]'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2 mb-1">
-                    <h4 className="text-xs font-bold text-white leading-tight">{notif.title}</h4>
+                    <h4 className="text-xs font-bold text-[#202622] leading-tight font-poppins">{notif.title}</h4>
                     {getPriorityBadge(notif.priority)}
                   </div>
 
-                  <p className="text-[11px] text-slate-400 leading-snug mb-2">{notif.message}</p>
+                  <p className="text-[11px] text-[#66706A] leading-snug mb-2">{notif.message}</p>
 
-                  <div className="flex items-center justify-between pt-1 border-t border-slate-800/60 text-[10px]">
-                    <span className="text-slate-500">{new Date(notif.createdAt).toLocaleDateString()}</span>
+                  <div className="flex items-center justify-between pt-1 border-t border-[#DDE3DC] text-[10px]">
+                    <span className="text-[#66706A]">{new Date(notif.createdAt).toLocaleDateString()}</span>
 
                     <div className="flex items-center gap-2">
                       {!notif.readAt && (
                         <button
                           onClick={() => handleMarkRead(notif._id)}
-                          className="text-slate-400 hover:text-teal-400 font-semibold flex items-center gap-0.5"
+                          className="text-[#2F6B4F] hover:underline font-semibold flex items-center gap-0.5"
                         >
                           <Check size={12} /> Read
                         </button>
@@ -190,7 +190,7 @@ const NotificationCenter = ({ farmerId = 'demo_farmer_1', onNavigate }) => {
                             if (onNavigate) onNavigate(notif.action.targetRoute || '/vault');
                             setIsOpen(false);
                           }}
-                          className="text-teal-400 font-bold hover:underline flex items-center gap-0.5"
+                          className="text-[#174A32] font-bold hover:underline flex items-center gap-0.5"
                         >
                           {notif.action.actionLabel} <ArrowRight size={10} />
                         </button>
