@@ -4,7 +4,8 @@ const path = require('path');
 
 const CHROME_PATH = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
 const SCREENSHOTS_DIR = path.join('C:', 'Users', '2020s', '.gemini', 'antigravity-ide', 'brain', '16b0a0cb-d440-4b68-a395-6a3d5ed7c0a1', 'scratch', 'real_screenshots');
-const OUTPUT_IMAGE = path.join('C:', 'Users', '2020s', '.gemini', 'antigravity-ide', 'brain', '16b0a0cb-d440-4b68-a395-6a3d5ed7c0a1', 'niti_setu_real_product_workflow_board.png');
+const OUTPUT_IMAGE = path.join('C:', 'Users', '2020s', '.gemini', 'antigravity-ide', 'brain', '16b0a0cb-d440-4b68-a395-6a3d5ed7c0a1', 'niti_setu_workflow_transparent.png');
+const PUBLIC_IMAGE = path.join('e:', 'nitisetu', 'frontend', 'public', 'niti_setu_workflow_transparent.png');
 
 function getBase64Image(filename) {
   const filePath = path.join(SCREENSHOTS_DIR, filename);
@@ -21,15 +22,13 @@ async function run() {
   const imgVerdict = getBase64Image('04_eligibility_verdict.png');
   const imgProof = getBase64Image('05_policy_evidence.png');
   const imgVault = getBase64Image('06_document_vault.png');
-  const imgOcr = getBase64Image('07_ocr_result.png');
-  const imgNotif = getBase64Image('08_notifications.png');
 
   const htmlContent = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Niti-Setu Real Product Workflow Board</title>
+  <title>Niti-Setu Real Product Workflow Board (Clean Transparent Background)</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
@@ -42,30 +41,15 @@ async function run() {
 
     body {
       width: 2560px;
-      height: 1440px;
-      background-color: #FAFCFB;
+      height: 1400px;
+      background: transparent !important;
       color: #0F172A;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      padding: 40px 50px;
+      padding: 20px 40px;
       position: relative;
       overflow: hidden;
-      /* Subtle purple thin outer presentation frame */
-      border: 12px solid #8B5CF6;
-    }
-
-    /* Background accent glow */
-    .bg-glow {
-      position: absolute;
-      top: -100px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 1200px;
-      height: 400px;
-      background: radial-gradient(circle, rgba(16, 185, 129, 0.06) 0%, rgba(255, 255, 255, 0) 70%);
-      pointer-events: none;
-      z-index: 0;
     }
 
     /* TOP HEADER */
@@ -75,8 +59,8 @@ async function run() {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 2px solid #E2E8F0;
-      padding-bottom: 24px;
+      border-bottom: 2px solid #CBD5E1;
+      padding-bottom: 20px;
     }
 
     .brand-box {
@@ -144,7 +128,7 @@ async function run() {
 
     .demo-link-box {
       border: 2px dashed #94A3B8;
-      background: #F1F5F9;
+      background: #F8FAFC;
       padding: 12px 24px;
       border-radius: 12px;
       display: flex;
@@ -169,7 +153,7 @@ async function run() {
       grid-template-columns: repeat(6, 1fr);
       gap: 20px;
       align-items: start;
-      margin-top: 20px;
+      margin-top: 16px;
     }
 
     .stage-card {
@@ -298,7 +282,7 @@ async function run() {
       object-position: top;
     }
 
-    /* SUPPORTING SECTION (OCR & Notifications) */
+    /* SUPPORTING SECTION */
     .supporting-strip {
       position: relative;
       z-index: 10;
@@ -376,8 +360,6 @@ async function run() {
   </style>
 </head>
 <body>
-
-  <div class="bg-glow"></div>
 
   <!-- HEADER -->
   <header>
@@ -553,13 +535,13 @@ async function run() {
 </html>
   `;
 
-  console.log('Rendering presentation slide HTML...');
+  console.log('Rendering presentation slide HTML with transparent background...');
   const browser = await puppeteer.launch({
     executablePath: CHROME_PATH,
     headless: true,
     defaultViewport: {
       width: 2560,
-      height: 1440,
+      height: 1400,
       deviceScaleFactor: 2
     },
     args: ['--no-sandbox', '--disable-setuid-sandbox']
@@ -567,10 +549,12 @@ async function run() {
 
   const page = await browser.newPage();
   await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
-  await page.screenshot({ path: OUTPUT_IMAGE, fullPage: true });
+  await page.screenshot({ path: OUTPUT_IMAGE, omitBackground: true, fullPage: true });
+
+  fs.copyFileSync(OUTPUT_IMAGE, PUBLIC_IMAGE);
 
   await browser.close();
-  console.log('Presentation board image generated successfully at:', OUTPUT_IMAGE);
+  console.log('Transparent presentation board image generated successfully at:', OUTPUT_IMAGE);
 }
 
 run().catch(console.error);
