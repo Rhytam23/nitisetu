@@ -223,6 +223,52 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }) => {
             {loading ? 'Authenticating...' : mode === 'register' ? 'Register Account' : 'Sign In'}
             <ArrowRight size={14} />
           </button>
+
+          {/* Quick 1-Click Demo Login Buttons */}
+          <div className="pt-4 border-t border-slate-800 space-y-2">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-teal-400 text-center">⚡ Instant 1-Click Demo Login</p>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const demoFarmer = {
+                    _id: 'demo_farmer_1',
+                    userId: 'demo_farmer_1',
+                    name: 'Ramesh Kumar',
+                    phone: '9876543210',
+                    state: 'Uttar Pradesh',
+                    district: 'Lucknow',
+                    role: 'FARMER'
+                  };
+                  const demoToken = 'demo_farmer_token_9876543210';
+                  onAuthSuccess(demoFarmer, demoToken);
+                  onClose();
+                }}
+                className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+              >
+                🌾 Demo Farmer
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const demoAdmin = {
+                    _id: 'demo_admin_1',
+                    userId: 'demo_admin_1',
+                    name: 'Niti-Setu Officer',
+                    email: 'admin@nitisetu.gov.in',
+                    role: 'ADMIN'
+                  };
+                  const demoToken = 'demo_admin_token_2026';
+                  onAuthSuccess(demoAdmin, demoToken);
+                  onClose();
+                }}
+                className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-teal-300 border border-slate-700 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+              >
+                🛡️ Demo Admin
+              </button>
+            </div>
+          </div>
         </form>
       </div>
     </div>
