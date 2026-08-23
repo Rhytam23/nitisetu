@@ -1,13 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
-import { Mic, MicOff, CheckCircle2, ShieldCheck, Sparkles, Target, HelpCircle } from 'lucide-react';
+import { Mic, MicOff, CheckCircle2, ShieldCheck, Sparkles, Target, MapPin } from 'lucide-react';
+import { getLocalizedLocationName } from '../utils/locationI18n';
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
 const ProfileForm = ({ onProfileSubmit, selectedLanguage }) => {
   const [profile, setProfile] = useState({
     name: '',
-    state: '',
-    district: '',
+    state: 'Uttar Pradesh',
+    district: 'Lucknow',
+    locality: 'Malihabad',
     aadhaar: '',
     land_acres: '',
     crop: '',
@@ -134,11 +136,12 @@ const ProfileForm = ({ onProfileSubmit, selectedLanguage }) => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-5">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+          <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+            <MapPin size={22} className="text-teal-400" />
             Farmer Profile Details
           </h2>
           <p className="text-slate-400 text-xs sm:text-sm font-normal mt-0.5">
-            Enter landholding parameters or use voice transcript assistance
+            State → District → Locality hierarchy with localized regional display
           </p>
         </div>
         
@@ -196,25 +199,44 @@ const ProfileForm = ({ onProfileSubmit, selectedLanguage }) => {
 
       {/* Profile Input Form */}
       <form onSubmit={handleSubmit} className="space-y-5">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        
+        {/* Regional Location Hierarchy: State -> District -> Locality */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5">State *</label>
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              State ({getLocalizedLocationName(profile.state, selectedLanguage)}) *
+            </label>
             <input 
               type="text" name="state" value={profile.state} onChange={handleChange} required
-              className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl focus:border-teal-500 outline-none text-white text-sm"
+              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:border-teal-500 outline-none text-white text-xs"
               placeholder="e.g. Uttar Pradesh"
             />
           </div>
           
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5">District</label>
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              District ({getLocalizedLocationName(profile.district, selectedLanguage)})
+            </label>
             <input 
               type="text" name="district" value={profile.district} onChange={handleChange}
-              className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl focus:border-teal-500 outline-none text-white text-sm"
-              placeholder="e.g. Varanasi"
+              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:border-teal-500 outline-none text-white text-xs"
+              placeholder="e.g. Lucknow"
             />
           </div>
-          
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+              Locality / Block ({getLocalizedLocationName(profile.locality, selectedLanguage)})
+            </label>
+            <input 
+              type="text" name="locality" value={profile.locality} onChange={handleChange}
+              className="w-full px-3 py-2 bg-slate-950 border border-slate-800 rounded-xl focus:border-teal-500 outline-none text-white text-xs"
+              placeholder="e.g. Malihabad"
+            />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label className="block text-xs font-semibold text-slate-300">Landholding (Acres) *</label>

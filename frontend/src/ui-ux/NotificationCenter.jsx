@@ -15,7 +15,7 @@ const NotificationCenter = ({ farmerId = 'demo_farmer_1', onNavigate }) => {
   const fetchNotifications = async () => {
     setLoading(true);
     try {
-      const baseUrl = import.meta.env.VITE_API_URL || '';
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001';
       const res = await fetch(`${baseUrl}/api/notifications/${farmerId}`);
       const data = await res.json();
 
@@ -32,7 +32,7 @@ const NotificationCenter = ({ farmerId = 'demo_farmer_1', onNavigate }) => {
 
   const handleMarkRead = async (notifId) => {
     try {
-      const baseUrl = import.meta.env.VITE_API_URL || '';
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001';
       await fetch(`${baseUrl}/api/notifications/${notifId}/read`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },

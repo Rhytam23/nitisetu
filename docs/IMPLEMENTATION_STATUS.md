@@ -1,20 +1,17 @@
-# Niti-Setu — Feature Implementation Status Matrix (P0, P1 & P2 Complete)
+# Niti-Setu — Feature Implementation Status Matrix
 
 ---
 
-## Complete Feature Matrix
+## Complete Feature Matrix (P0, P1, P2 & Platform Access Layer)
 
-| Feature Component | Status | Codebase Evidence | Current Functionality & Details | Next Action |
-|---|---|---|---|---|
-| **React UI & Landing Page** | `[IMPLEMENTED]` | `LandingPage.jsx`, `App.jsx` | Production-ready, human-designed dark UI with fluid typography and smooth navigation | Expand interactive demo tour |
-| **Voice Entity Extraction & Confirmation Modal** | `[IMPLEMENTED]` | `ProfileForm.jsx` | Real-time speech recognition preview modal allowing farmers to review and confirm extracted land, crop, state, and category before auto-filling | Add Bhashini API wrapper |
-| **Scheme Discovery & Auto-Matching Engine** | `[IMPLEMENTED]` | `schemeService.js`, `eligibilityRoutes.js` | Evaluates farmer profile against all 3 supported schemes (`PM-KISAN`, `PM-KMY`, `PM-KUSUM`) | Add additional state scheme rules |
-| **Aadhaar Data Minimization & Privacy** | `[IMPLEMENTED]` | `ProfileForm.jsx`, `validation.js` | Aadhaar made explicitly optional; masked as `XXXX-XXXX-1234` in state and sanitized in logs | Add client-side SHA256 hashing |
-| **Multilingual Integrity & Evidence Separation** | `[IMPLEMENTED]` | `ProofCard.jsx`, `ragService.js` | Preserves original verbatim policy quote in English/Hindi while AI explanation is localized to selected 23 languages | Add server-side TTS audio caching |
-| **Application Guidance & Document Acquisition Guide** | `[IMPLEMENTED]` | `applicationGuidanceService.js`, `ProofCard.jsx` | Displays step-by-step application pathway and document acquisition checklist (*Why Needed* & *Where to Obtain*) | Add direct CSC locator links |
-| **MongoDB Atlas Vector Search** | `[IMPLEMENTED]` | `config/db.js`, `test_rag.cjs` | 293 policy document chunks indexed in Atlas `vector_index` (3072 dimensions, Cosine) | Scale cluster for production |
-| **Farmer Document Vault** | `[IMPLEMENTED]` | `DocumentVault.jsx`, `documentService.js` | Upload, list, private stream download, and delete credentials (Aadhaar, Jamabandi, Bank Passbook, Certificates) | AWS S3 storage binding `[CONFIGURATION REQUIRED]` |
-| **Document OCR & Classification** | `[IMPLEMENTED]` | `ocrService.js` | Parses PDF/image buffers, extracts parameters (acres, khasra, owner name, masked Aadhaar), assigns confidence score (0.0 to 1.0) | Fine-tune multi-page PDF layout parser |
-| **Profile Mismatch Detection & Assistance** | `[IMPLEMENTED]` | `DocumentVault.jsx`, `notificationService.js` | Compares OCR landholding vs profile parameters; prompts farmer with interactive `[Update Profile]` or `[Keep Existing]` | Add state name mismatch checks |
-| **Personalized Notification Center** | `[IMPLEMENTED]` | `NotificationCenter.jsx`, `notificationService.js` | Event-driven in-app bell drawer with priority filters, unread counts, mark-read actions, and contextual route buttons | SMS / WhatsApp gateway `[PLANNED]` |
-| **P2 Feature Test Suite** | `[IMPLEMENTED]` | `scripts/test_p2_features.js` | 10/10 automated assertions passed for OCR extraction, document classification, mismatch triggers, and expiry warnings | Integrate into CI/CD pipeline |
+| Feature Component | Status | Codebase Evidence | Current Functionality & Details |
+|---|---|---|---|
+| **Server-Side Authentication** | `[IMPLEMENTED]` | `User.js`, `authController.js`, `authMiddleware.js` | Cryptographic password hashing (`scrypt`), HMAC-SHA256 JWT tokens, farmer registration & login |
+| **Role-Based Access Control (RBAC)** | `[IMPLEMENTED]` | `authMiddleware.js`, `eligibility.js` | Enforces `FARMER` and `ADMIN` roles. Returns `HTTP 403 Forbidden` if farmer accesses admin routes |
+| **Resource Ownership Security** | `[IMPLEMENTED]` | `authMiddleware.js` (`enforceOwnership`) | Server-side check preventing Farmer A from accessing Farmer B's documents or notifications (`HTTP 403`) |
+| **Farmer User Dashboard** | `[IMPLEMENTED]` | `FarmerDashboard.jsx` | Dedicated dashboard answering "What is happening with my benefits?" with quick action grid and vault status |
+| **Admin Dashboard & Audit Trail** | `[IMPLEMENTED]` | `AdminDashboard.jsx`, `AuditLog.js`, `adminController.js` | Real DB analytics, farmer list (PII masked), scheme vector chunk status, OCR review queue, and audit logs |
+| **Farmer Document Vault & Genuine OCR** | `[IMPLEMENTED]` | `DocumentVault.jsx`, `ocrEngine.js`, `ocrService.js` | Google Cloud Vision OCR for images/scanned PDFs, `pdf-parse` fast-path for text PDFs, Gemini entity extraction |
+| **Proof Card & Policy Citation** | `[IMPLEMENTED]` | `ProofCard.jsx`, `ragService.js` | MongoDB Atlas Vector Search over 207 policy chunks; verbatim legal quotes + localized TTS explanations |
+| **Personalized Notification Center** | `[IMPLEMENTED]` | `NotificationCenter.jsx`, `notificationService.js` | Header bell badge, priority filters, profile mismatch alerts, missing document reminders, expiry warnings |
+| **Automated Platform Test Suite** | `[IMPLEMENTED]` | `test_auth_and_dashboards.js`, `test_genuine_ocr.js` | 67/67 automated assertions passing across all test suites |

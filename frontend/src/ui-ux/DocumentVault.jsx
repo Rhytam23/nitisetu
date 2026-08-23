@@ -38,7 +38,7 @@ const DocumentVault = ({ farmerId = 'demo_farmer_1', selectedLanguage, currentPr
   const fetchDocuments = async () => {
     setLoading(true);
     try {
-      const baseUrl = import.meta.env.VITE_API_URL || '';
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001';
       const res = await fetch(`${baseUrl}/api/documents/${farmerId}`);
       const data = await res.json();
       if (data.success && Array.isArray(data.data)) {
@@ -100,7 +100,7 @@ const DocumentVault = ({ farmerId = 'demo_farmer_1', selectedLanguage, currentPr
     if (formData.expiryDate) body.append('expiryDate', formData.expiryDate);
 
     try {
-      const baseUrl = import.meta.env.VITE_API_URL || '';
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001';
       const res = await fetch(`${baseUrl}/api/documents/upload`, {
         method: 'POST',
         body
@@ -124,7 +124,7 @@ const DocumentVault = ({ farmerId = 'demo_farmer_1', selectedLanguage, currentPr
 
   const handleConfirmDoc = async (docId, customFields = null) => {
     try {
-      const baseUrl = import.meta.env.VITE_API_URL || '';
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001';
       const res = await fetch(`${baseUrl}/api/documents/${docId}/confirm`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },

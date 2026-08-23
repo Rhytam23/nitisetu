@@ -24,7 +24,27 @@ async function runVaultAndNotificationTestSuite() {
         }
     };
 
-    const testFarmerId = 'test_farmer_99';
+    const testFarmerPhone = `98${Math.floor(10000000 + Math.random() * 90000000)}`;
+    let farmerToken = null;
+    let testFarmerId = null;
+
+    // 0. Register Test User for Auth Token Context
+    try {
+        const authRes = await fetch(`${BASE_URL}/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name: 'Vault Test Farmer',
+                phone: testFarmerPhone,
+                password: 'TestPassword2026!'
+            })
+        });
+        const authData = await authRes.json();
+        farmerToken = authData.data?.token;
+        testFarmerId = authData.data?.user?.userId;
+    } catch (e) {}
+
+    const authHeader = farmerToken ? { 'Authorization': `Bearer ${farmerToken}` } : {};
 
     // 1. Upload Document to Vault API Test
     let uploadedDocId = null;
@@ -38,6 +58,7 @@ async function runVaultAndNotificationTestSuite() {
 
         const res = await fetch(`${BASE_URL}/documents/upload`, {
             method: 'POST',
+            headers: authHeader,
             body: formData
         });
         const data = await res.json();
@@ -52,7 +73,9 @@ async function runVaultAndNotificationTestSuite() {
 
     // 2. Fetch Vault Documents API Test
     try {
-        const res = await fetch(`${BASE_URL}/documents/${testFarmerId}`);
+        const res = await fetch(`${BASE_URL}/documents/${testFarmerId}`, {
+            headers: authHeader
+        });
         const data = await res.json();
 
         assert(res.status === 200 && data.success === true, "GET /api/documents/:farmerId returns HTTP 200 OK");
@@ -84,7 +107,7 @@ async function runVaultAndNotificationTestSuite() {
 
         const res = await fetch(`${BASE_URL}/notifications/generate`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', ...authHeader },
             body: JSON.stringify(profilePayload)
         });
         const data = await res.json();
@@ -100,7 +123,9 @@ async function runVaultAndNotificationTestSuite() {
     // 5. Fetch Notifications & Unread Count API Test
     let targetNotifId = null;
     try {
-        const res = await fetch(`${BASE_URL}/notifications/${testFarmerId}`);
+        const res = await fetch(`${BASE_URL}/notifications/${testFarmerId}`, {
+            headers: authHeader
+        });
         const data = await res.json();
 
         assert(res.status === 200 && data.success === true, "GET /api/notifications/:farmerId returns HTTP 200 OK");
@@ -116,7 +141,7 @@ async function runVaultAndNotificationTestSuite() {
         try {
             const res = await fetch(`${BASE_URL}/notifications/${targetNotifId}/read`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', ...authHeader },
                 body: JSON.stringify({ farmerId: testFarmerId })
             });
             const data = await res.json();
@@ -132,7 +157,7 @@ async function runVaultAndNotificationTestSuite() {
         try {
             const res = await fetch(`${BASE_URL}/documents/${uploadedDocId}?farmerId=${testFarmerId}`, {
                 method: 'DELETE',
-                headers: { 'x-admin-key': 'dev_admin_key' }
+                headers: { 'x-admin-key': 'dev_admin_key', ...authHeader }
             });
             const data = await res.json();
 

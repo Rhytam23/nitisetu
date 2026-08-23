@@ -1,21 +1,63 @@
-import { useState } from 'react';
-import { Loader2, ArrowLeft, ShieldCheck, FolderLock, Target } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Loader2, ArrowLeft, ShieldCheck, FolderLock, Target, LogIn, LogOut, User, LayoutDashboard, Shield } from 'lucide-react';
 import LandingPage from './ui-ux/LandingPage';
 import ProfileForm from './ui-ux/ProfileForm';
 import ProofCard from './ui-ux/ProofCard';
 import DocumentVault from './ui-ux/DocumentVault';
 import NotificationCenter from './ui-ux/NotificationCenter';
+import FarmerDashboard from './ui-ux/FarmerDashboard';
+import AdminDashboard from './ui-ux/AdminDashboard';
+import AuthModal from './ui-ux/AuthModal';
 import LanguageSelector from './ui-ux/LanguageSelector';
 import './index.css';
 
 function App() {
-  const [view, setView] = useState('landing'); // 'landing', 'tool', 'vault'
+  const [view, setView] = useState('landing'); // 'landing', 'dashboard', 'tool', 'vault', 'admin-dashboard'
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [currentScheme, setCurrentScheme] = useState('');
   const [selectedLanguage, setSelectedLanguage] = useState('en');
-  const [farmerId, setFarmerId] = useState('demo_farmer_1');
+  
+  // User Authentication State
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
+  useEffect(() => {
+    // Restore session if token in localStorage
+    const savedToken = localStorage.getItem('nitisetu_token');
+    const savedUser = localStorage.getItem('nitisetu_user');
+    if (savedToken && savedUser) {
+      try {
+        setToken(savedToken);
+        setUser(JSON.parse(savedUser));
+      } catch (e) {}
+    }
+  }, []);
+
+  const handleAuthSuccess = (userData, tokenData) => {
+    setUser(userData);
+    setToken(tokenData);
+    localStorage.setItem('nitisetu_token', tokenData);
+    localStorage.setItem('nitisetu_user', JSON.stringify(userData));
+
+    if (userData.role === 'ADMIN') {
+      setView('admin-dashboard');
+    } else {
+      setView('dashboard');
+    }
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    setToken(null);
+    localStorage.removeItem('nitisetu_token');
+    localStorage.removeItem('nitisetu_user');
+    setView('landing');
+  };
+
+  const farmerId = user?.userId || user?._id || 'demo_farmer_1';
 
   const [farmerProfile, setFarmerProfile] = useState({
     state: 'Uttar Pradesh',
@@ -31,18 +73,17 @@ function App() {
     setCurrentScheme(profileData.scheme);
     setFarmerProfile(profileData);
 
-    if (profileData.phone) setFarmerId(`farmer_${profileData.phone}`);
-
     const payload = { ...profileData, preferred_language: selectedLanguage, _id: farmerId };
 
     try {
-      const baseUrl = import.meta.env.VITE_API_URL || '';
-      const apiUrl = baseUrl ? `${baseUrl}/api/check` : 'http://localhost:5001/api/check';
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+      const apiUrl = `${baseUrl}/api/check`;
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const response = await fetch(apiUrl, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify(payload),
       });
 
@@ -82,13 +123,20 @@ function App() {
   };
 
   if (view === 'landing') {
-    return <LandingPage onGetStarted={() => setView('tool')} />;
+    return <LandingPage onGetStarted={() => setView(user ? 'dashboard' : 'tool')} />;
   }
 
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col font-sans selection:bg-teal-500/30 selection:text-teal-200 relative text-slate-200">
       
-      {/* Top Header */}
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onAuthSuccess={handleAuthSuccess}
+      />
+
+      {/* Top Header Navigation */}
       <header className="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
           
@@ -99,17 +147,38 @@ function App() {
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
+            <img src="/logo.jpg" alt="Niti-Setu Logo" className="w-8 h-8 rounded-lg object-cover border border-slate-700" />
             <div>
               <h1 className="text-xl font-bold tracking-tight text-white">Niti-Setu</h1>
               <p className="text-teal-400 text-[10px] font-semibold uppercase tracking-wider hidden sm:block">Government Scheme Access</p>
             </div>
           </div>
 
-          {/* Navigation Controls & Notification Center */}
+          {/* Navigation Controls & Role Badges */}
           <div className="flex items-center gap-2 sm:gap-3">
             
             {/* View Switcher Tabs */}
             <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800 text-xs font-semibold">
+              {user?.role === 'ADMIN' ? (
+                <button
+                  onClick={() => setView('admin-dashboard')}
+                  className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
+                    view === 'admin-dashboard' ? 'bg-teal-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <Shield size={14} /> Admin
+                </button>
+              ) : (
+                <button
+                  onClick={() => setView('dashboard')}
+                  className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
+                    view === 'dashboard' ? 'bg-teal-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <LayoutDashboard size={14} /> Dashboard
+                </button>
+              )}
+
               <button
                 onClick={() => setView('tool')}
                 className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors ${
@@ -134,6 +203,31 @@ function App() {
             }} />
 
             <LanguageSelector onLanguageChange={setSelectedLanguage} />
+
+            {/* Auth Button / User Profile Control */}
+            {user ? (
+              <div className="flex items-center gap-2 border-l border-slate-800 pl-2">
+                <div className="hidden sm:block text-right">
+                  <p className="text-xs font-bold text-white leading-tight">{user.name}</p>
+                  <span className="text-[9px] text-teal-400 uppercase font-semibold">{user.role}</span>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  title="Log Out"
+                  className="p-2 bg-slate-950 hover:bg-slate-800 text-slate-400 hover:text-red-400 rounded-xl border border-slate-800 transition-colors"
+                >
+                  <LogOut size={16} />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowAuthModal(true)}
+                className="px-3 py-1.5 bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold rounded-xl text-xs flex items-center gap-1.5 transition-colors shadow-sm"
+              >
+                <LogIn size={14} /> Sign In
+              </button>
+            )}
+
           </div>
 
         </div>
@@ -142,7 +236,11 @@ function App() {
       {/* Main Dashboard Views */}
       <main className="flex-grow max-w-4xl mx-auto w-full px-4 sm:px-6 py-8 space-y-8 relative z-10">
         
-        {view === 'vault' ? (
+        {view === 'admin-dashboard' ? (
+          <AdminDashboard user={user} token={token} />
+        ) : view === 'dashboard' ? (
+          <FarmerDashboard user={user} onNavigate={setView} onLogout={handleLogout} />
+        ) : view === 'vault' ? (
           <DocumentVault 
             farmerId={farmerId} 
             selectedLanguage={selectedLanguage} 

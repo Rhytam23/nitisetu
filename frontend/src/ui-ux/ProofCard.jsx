@@ -12,7 +12,7 @@ const ProofCard = ({ result, schemeName, selectedLanguage, farmerId = 'demo_farm
 
   const fetchVaultDocuments = async () => {
     try {
-      const baseUrl = import.meta.env.VITE_API_URL || '';
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5001';
       const res = await fetch(`${baseUrl}/api/documents/${farmerId}`);
       const data = await res.json();
       if (data.success && Array.isArray(data.data)) {

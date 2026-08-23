@@ -35,9 +35,7 @@ const LandingPage = ({ onGetStarted }) => {
       <nav className="w-full border-b border-slate-800 bg-slate-900/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-teal-500 flex items-center justify-center text-slate-950 font-black text-lg">
-              N
-            </div>
+            <img src="/logo.jpg" alt="Niti-Setu Logo" className="w-9 h-9 rounded-lg object-cover border border-slate-700" />
             <div>
               <span className="text-xl font-bold text-white tracking-tight">Niti-Setu</span>
               <span className="text-xs text-slate-400 block -mt-1 font-medium">Government Benefit Verification</span>

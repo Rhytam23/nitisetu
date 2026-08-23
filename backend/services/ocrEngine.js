@@ -74,6 +74,6 @@ export async function extractRawTextFromDocument(fileBuffer, mimeType) {
         rawText: fallbackText,
         confidence: fallbackText.length > 20 ? 0.75 : 0.40,
         isTextNative: false,
-        ocrEngineUsed: apiKey ? 'Google-Cloud-Vision-OCR' : 'Raw-Buffer-Extractor'
+        ocrEngineUsed: 'Raw-Buffer-Extractor'
     };
 }
