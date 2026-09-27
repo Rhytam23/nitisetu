@@ -157,3 +157,29 @@ The eligibility endpoint returns a response like this:
 - Keep the backend and frontend running at the same time during local development.
 - If the UI cannot reach the API, check the backend port and the `VITE_API_URL` value.
 - If eligibility returns fallback output, verify MongoDB connectivity and the Gemini API key.
+
+---
+
+## 📖 Project Understanding (Future Reference)
+
+Niti-Setu helps Indian farmers understand whether they qualify for government agricultural
+schemes (PM-KISAN, PM-KMY, PM-KUSUM) through a guided step-by-step UI. It combines a Node/Express
+API, MongoDB storage, and retrieval-augmented generation (LangChain + Google Gemini + MongoDB
+Atlas Vector Search) over the official scheme PDFs to produce a structured verdict — status,
+reasoning, proof text, citation, and required documents — with a deterministic rules fallback
+when the AI/retrieval layer is unavailable.
+
+**Stack:** React + Vite + Tailwind (frontend) · Node.js + Express + Mongoose (backend) ·
+LangChain + Gemini + MongoDB Atlas Vector Search (RAG).
+**Status:** functional govtech/agritech tool, deployable on Vercel, with graceful degradation
+built in.
+
+## 🎯 Where This Can Be Used
+
+- Farmer-facing scheme-eligibility checker — real social-impact utility for an underserved user
+  base.
+- Govtech/agritech portfolio piece demonstrating RAG-over-official-documents done responsibly
+  (citations + deterministic fallback, not just an LLM guessing).
+- **Hackathons:** strong fit for govtech/agritech/social-impact tracks in India — the
+  "works even without AI" fallback design is a genuinely good answer to the judge question
+  "what happens when the model is wrong or down?"
